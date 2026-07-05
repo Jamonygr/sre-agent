@@ -6,7 +6,7 @@ resource "azurerm_application_insights_workbook" "sre_overview" {
   name                = random_uuid.sre_overview.result
   resource_group_name = var.resource_group_name
   location            = var.location
-  display_name        = "SRE Agent Windows VM Lab - Operations Overview"
+  display_name        = "SRE Agent Azure Lab - Operations Overview"
   tags                = var.tags
 
   data_json = jsonencode({
@@ -54,7 +54,7 @@ resource "azurerm_application_insights_workbook" "updates" {
   name                = random_uuid.updates.result
   resource_group_name = var.resource_group_name
   location            = var.location
-  display_name        = "SRE Agent Windows VM Lab - Update Compliance"
+  display_name        = "SRE Agent Azure Lab - Update Compliance"
   tags                = var.tags
 
   data_json = jsonencode({
@@ -89,7 +89,7 @@ resource "azurerm_application_insights_workbook" "incidents" {
   name                = random_uuid.incidents.result
   resource_group_name = var.resource_group_name
   location            = var.location
-  display_name        = "SRE Agent Windows VM Lab - Incident Response"
+  display_name        = "SRE Agent Azure Lab - Incident Response"
   tags                = var.tags
 
   data_json = jsonencode({

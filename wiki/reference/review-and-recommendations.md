@@ -4,7 +4,7 @@ Last reviewed: 2026-07-05.
 
 ## Current Status
 
-The lab was scaffolded from the local Azure operations lab patterns, then refocused into the SRE Agent Windows VM Lab.
+The lab was scaffolded from the local Azure operations lab patterns, then refocused into the SRE Agent Azure Lab.
 
 | Area | Status | Notes |
 | --- | --- | --- |

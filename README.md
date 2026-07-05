@@ -1,4 +1,4 @@
-# SRE Agent Windows VM Lab
+# SRE Agent Azure Lab
 
 [![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.9.0-623CE4?logo=terraform)](https://terraform.io)
 [![AzureRM](https://img.shields.io/badge/AzureRM-4.x-0078D4?logo=microsoftazure)](https://registry.terraform.io/providers/hashicorp/azurerm/latest)
@@ -6,12 +6,14 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 <p align="center">
-  <img src="docs/images/hero-sre-agent-lab.svg" alt="SRE Agent Windows VM Lab banner" width="1000" />
+  <img src="docs/images/hero-sre-agent-lab.svg" alt="SRE Agent Azure Lab banner" width="1000" />
 </p>
 
 ## Overview
 
-SRE Agent Windows VM Lab is a Terraform-first Azure sandbox for practicing native incident detection and guided remediation on Windows VM workloads. It uses Azure Monitor Agent, Data Collection Rules, Log Analytics, KQL alerts, Workbooks, Azure Automation runbooks, Update Manager, Policy, and cost controls.
+SRE Agent Azure Lab is a Terraform-first Azure sandbox for practicing native incident detection and guided remediation. It provisions Windows VM incident targets plus optional modern app-platform targets: Azure Kubernetes Service, Azure App Service, Azure Container Apps, and Azure Functions.
+
+It uses Azure Monitor Agent, Data Collection Rules, Log Analytics, KQL alerts, Workbooks, Azure Automation runbooks, Update Manager, Policy, Resource Health alerts, and cost controls.
 
 The lab is intentionally Azure-native: Terraform provisions the platform, Azure Monitor detects signals, and Automation runbooks perform safe lab remediation. No third-party monitoring stack is required in v1.
 
@@ -28,7 +30,7 @@ The lab is intentionally Azure-native: Terraform provisions the platform, Azure 
 ## Architecture
 
 <p align="center">
-  <img src="docs/images/architecture-overview.svg" alt="SRE Agent Windows VM Lab architecture" width="1100" />
+  <img src="docs/images/architecture-overview.svg" alt="SRE Agent Azure Lab architecture" width="1100" />
 </p>
 
 The deployment creates four main resource-group roles:
@@ -37,6 +39,7 @@ The deployment creates four main resource-group roles:
 | --- | --- |
 | `network` | Hub, management, and workload VNets, subnets, NSGs, peering, optional Firewall/VPN |
 | `windows` | Jumpbox and Windows IIS incident targets |
+| `apps` | Optional AKS, App Service, Container Apps, and Functions targets |
 | `sre` | Log Analytics, DCRs, alerts, Workbooks, dashboard, Automation runbooks, optional Backup |
 | `governance` | Optional Azure Policy assignments and guardrail resources |
 
@@ -59,10 +62,10 @@ The deployment creates four main resource-group roles:
 | --- | --- | --- | --- |
 | `cheap-lab` | `environments/cheap-lab.tfvars` | First review and low-cost demos | Lowest |
 | `dev` | `environments/dev.tfvars` | Terraform and module testing | Very low |
-| `lab` | `environments/lab.tfvars` | Normal SRE incident lab | Moderate |
-| `full` | `environments/full.tfvars` | Expanded demo with backup and extra targets | Highest |
+| `lab` | `environments/lab.tfvars` | Normal SRE incident lab with AKS, App Service, Container Apps, and Functions | Moderate |
+| `full` | `environments/full.tfvars` | Expanded demo with app platform, backup, and extra targets | Highest |
 
-Start with `cheap-lab` unless you specifically need backup, Firewall, VPN, or extra Windows targets.
+Start with `cheap-lab` unless you specifically need AKS, App Service, Container Apps, Functions, backup, Firewall, VPN, or extra Windows targets.
 
 ## Quick Start
 
@@ -109,6 +112,10 @@ deploy_windows_targets        = true
 deploy_iis_farm               = true
 deploy_firewall               = false
 deploy_vpn_gateway            = false
+deploy_aks                    = true
+deploy_app_service            = true
+deploy_container_apps         = true
+deploy_functions              = true
 ```
 
 ## Lab Scenarios
@@ -127,6 +134,7 @@ deploy_vpn_gateway            = false
 | Diagnostics collection | Use `Collect-VMDiagnostics` to capture service, event, volume, and process snapshots |
 | Update governance | Use Update Manager maintenance configs and PatchGroup tags |
 | Cost guardrail | Track spend with an Azure budget on the SRE resource group |
+| Modern app platform | Deploy AKS, App Service, Container Apps, and Functions as additional Resource Health and operations targets |
 
 ## Testing
 
@@ -146,8 +154,8 @@ Terratest smoke tests live in `tests/` and skip live Azure checks when `ARM_SUBS
 
 - Keep `enable_alert_runbook_webhooks = false` until you intentionally want alerts to invoke runbooks.
 - Keep `allowed_rdp_source_ips = []` unless you have a trusted CIDR.
-- Use `cheap-lab` first; `full` enables more VMs and Backup.
-- Firewall, VPN Gateway, Backup storage, and Managed Grafana can materially increase cost.
+- Use `cheap-lab` first; `lab` enables modern app-platform services, and `full` adds more VMs and Backup.
+- AKS nodes, App Service plans, Firewall, VPN Gateway, Backup storage, and Managed Grafana can materially increase cost.
 - Destroy temporary deployments when finished.
 
 ## Documentation Map

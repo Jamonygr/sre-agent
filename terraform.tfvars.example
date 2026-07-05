@@ -8,7 +8,7 @@ project         = "sreag"
 environment     = "lab"
 location        = "westus2"
 owner           = "Your-Name"
-repository_url  = "https://github.com/Jamonygr/sre-agent-windows-vm-lab"
+repository_url  = "https://github.com/Jamonygr/sre-agent"
 
 admin_username = "azureadmin"
 admin_password = null # Prefer TF_VAR_admin_password or an ignored terraform.tfvars file.
@@ -43,12 +43,24 @@ deploy_domain_controller     = false
 deploy_sql_vm                = false
 deploy_firewall              = false
 deploy_vpn_gateway           = false
+deploy_aks                   = true
+deploy_app_service           = true
+deploy_container_apps        = true
+deploy_functions             = true
 
 # Access
 enable_jumpbox_public_ip = false
 enable_iis_public_ip     = true
 allowed_rdp_source_ips   = []
 allowed_http_source_ips  = ["0.0.0.0/0"]
+
+# App platform targets
+aks_node_count              = 1
+aks_node_vm_size            = "Standard_B2s"
+app_service_plan_sku_name   = "B1"
+function_app_plan_sku_name  = "Y1"
+container_app_min_replicas  = 0
+container_app_max_replicas  = 1
 
 # Notifications
 alert_email_receivers = [

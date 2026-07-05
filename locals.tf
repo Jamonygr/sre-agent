@@ -29,7 +29,7 @@ locals {
       Environment = var.environment
       Project     = var.project
       ManagedBy   = "Terraform"
-      Purpose     = "SRE Agent Windows VM Lab"
+      Purpose     = "SRE Agent Azure Lab"
       Owner       = var.owner
       CostCenter  = "Learning"
       Repository  = var.repository_url
@@ -45,6 +45,15 @@ locals {
 
   vm_name_environment = substr(replace(local.environment, "-", ""), 0, 4)
   vm_name_suffix      = "${local.vm_name_environment}${local.location_short}"
+
+  deploy_app_platform_targets = var.deploy_aks || var.deploy_app_service || var.deploy_container_apps || var.deploy_functions
+  app_resource_group_name     = local.deploy_app_platform_targets ? module.rg_apps[0].name : null
+  app_resource_group_id       = local.deploy_app_platform_targets ? module.rg_apps[0].id : null
+  app_name_safe_base          = replace("${local.project}${local.environment}${local.location_short}", "/[^a-z0-9]/", "")
+  app_global_suffix           = random_string.suffix.result
+  app_dns_prefix              = substr("aks${local.app_name_safe_base}", 0, 54)
+  function_storage_name       = substr("stfn${local.app_name_safe_base}${local.app_global_suffix}", 0, 24)
+  log_analytics_workspace_id  = var.deploy_monitoring && var.deploy_log_analytics ? module.log_analytics[0].id : null
 
   monitored_vm_ids_by_key = merge(
     var.deploy_windows_targets && var.deploy_jumpbox ? { jumpbox = module.jumpbox[0].vm_id } : {},

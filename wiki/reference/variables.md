@@ -30,6 +30,10 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | `deploy_policy` | `true` | Create Policy audit assignments |
 | `deploy_cost_management` | `true` | Create budget on SRE resource group |
 | `deploy_windows_targets` | `true` | Deploy Windows VM targets |
+| `deploy_aks` | `false` | Deploy Azure Kubernetes Service |
+| `deploy_app_service` | `false` | Deploy Azure App Service |
+| `deploy_container_apps` | `false` | Deploy Azure Container Apps |
+| `deploy_functions` | `false` | Deploy Azure Functions |
 
 ## VM And Access
 
@@ -42,6 +46,20 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | `enable_iis_public_ip` | `true` | Public IP for IIS HTTP testing |
 | `allowed_rdp_source_ips` | `[]` | Trusted public RDP CIDRs |
 | `allowed_http_source_ips` | `["0.0.0.0/0"]` | HTTP source CIDRs |
+
+## App Platform Targets
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `aks_node_count` | `1` | AKS system node pool size |
+| `aks_node_vm_size` | `Standard_B2s` | AKS system node VM size |
+| `aks_azure_policy_enabled` | `false` | Enable Azure Policy add-on for AKS |
+| `app_service_plan_sku_name` | `B1` | Linux App Service plan SKU |
+| `function_app_plan_sku_name` | `Y1` | Linux Function App plan SKU |
+| `function_app_node_version` | `20` | Function App Node.js runtime |
+| `container_app_image` | Microsoft sample image | Demo Container App image |
+| `container_app_min_replicas` | `0` | Minimum Container App replicas |
+| `container_app_max_replicas` | `1` | Maximum Container App replicas |
 
 ## SRE Thresholds
 

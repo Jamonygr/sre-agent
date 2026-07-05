@@ -4,12 +4,15 @@
 
 output "resource_group_names" {
   description = "Resource groups created for the SRE agent lab."
-  value = {
-    network    = module.rg_network.name
-    windows    = module.rg_windows.name
-    sre        = module.rg_sre.name
-    governance = module.rg_governance.name
-  }
+  value = merge(
+    {
+      network    = module.rg_network.name
+      windows    = module.rg_windows.name
+      sre        = module.rg_sre.name
+      governance = module.rg_governance.name
+    },
+    local.deploy_app_platform_targets ? { apps = module.rg_apps[0].name } : {}
+  )
 }
 
 output "hub_vnet_id" {
@@ -65,6 +68,36 @@ output "dashboard_id" {
 output "managed_grafana_endpoint" {
   description = "Azure Managed Grafana endpoint when deployed."
   value       = var.deploy_managed_grafana ? module.managed_grafana[0].endpoint : null
+}
+
+output "app_platform_resource_group_name" {
+  description = "Resource group for optional AKS, App Service, Container Apps, and Functions targets."
+  value       = local.app_resource_group_name
+}
+
+output "aks_cluster_name" {
+  description = "AKS cluster name when deployed."
+  value       = var.deploy_aks ? module.aks[0].name : null
+}
+
+output "aks_cluster_fqdn" {
+  description = "AKS API server FQDN when deployed."
+  value       = var.deploy_aks ? module.aks[0].fqdn : null
+}
+
+output "app_service_default_hostname" {
+  description = "Azure App Service default hostname when deployed."
+  value       = var.deploy_app_service ? module.app_service[0].default_hostname : null
+}
+
+output "container_app_fqdn" {
+  description = "Azure Container App latest revision FQDN when deployed."
+  value       = var.deploy_container_apps ? module.container_apps[0].fqdn : null
+}
+
+output "function_app_default_hostname" {
+  description = "Azure Functions default hostname when deployed."
+  value       = var.deploy_functions ? module.functions[0].default_hostname : null
 }
 
 output "action_group_id" {
@@ -135,12 +168,27 @@ output "sre_agent_summary" {
   }
 }
 
+output "app_platform_summary" {
+  description = "Quick summary of optional modern app-platform lab targets."
+  value = {
+    resource_group = local.app_resource_group_name
+    aks            = var.deploy_aks ? module.aks[0].name : null
+    app_service    = var.deploy_app_service ? module.app_service[0].default_hostname : null
+    container_app  = var.deploy_container_apps ? module.container_apps[0].fqdn : null
+    functions      = var.deploy_functions ? module.functions[0].default_hostname : null
+  }
+}
+
 output "connection_info" {
   description = "Quick connection summary."
   value       = <<-EOT
     Jumpbox private IP: ${var.deploy_windows_targets && var.deploy_jumpbox ? module.jumpbox[0].private_ip_address : "not deployed"}
     Jumpbox public IP:  ${var.deploy_windows_targets && var.deploy_jumpbox && var.enable_jumpbox_public_ip ? module.jumpbox[0].public_ip_address : "not enabled"}
     IIS endpoint:       ${length(module.iis_web_servers) > 0 && var.enable_iis_public_ip ? "http://${values(module.iis_web_servers)[0].public_ip_address}" : "not enabled"}
+    App Service:        ${var.deploy_app_service ? "https://${module.app_service[0].default_hostname}" : "not deployed"}
+    Container App:      ${var.deploy_container_apps ? "https://${module.container_apps[0].fqdn}" : "not deployed"}
+    Function App:       ${var.deploy_functions ? "https://${module.functions[0].default_hostname}" : "not deployed"}
+    AKS API FQDN:       ${var.deploy_aks ? module.aks[0].fqdn : "not deployed"}
     Log Analytics:      ${var.deploy_monitoring && var.deploy_log_analytics ? module.log_analytics[0].name : "not deployed"}
     Patch group:        ${var.default_patch_group}
     Credentials:        ${var.admin_username} / <password from private tfvars or TF_VAR_admin_password>

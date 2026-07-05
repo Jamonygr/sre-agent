@@ -108,4 +108,4 @@ if ($script:FailedChecks -gt 0) {
     throw "$script:FailedChecks validation check(s) failed."
 }
 
-Write-Host "SRE Agent Windows VM Lab validation passed for $baseName."
+Write-Host "SRE Agent Azure Lab validation passed for $baseName."

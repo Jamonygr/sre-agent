@@ -37,6 +37,10 @@ deploy_domain_controller             = false
 deploy_sql_vm                        = false
 deploy_firewall                      = false
 deploy_vpn_gateway                   = false
+deploy_aks                           = true
+deploy_app_service                   = true
+deploy_container_apps                = true
+deploy_functions                     = true
 
 enable_jumpbox_public_ip    = false
 enable_iis_public_ip        = true
@@ -44,9 +48,11 @@ iis_server_count            = 1
 vm_size                     = "Standard_B2s"
 jumpbox_vm_size             = "Standard_B2s"
 iis_vm_size                 = "Standard_B1ms"
+aks_node_count              = 1
+aks_node_vm_size            = "Standard_B2s"
 log_retention_days          = 30
 log_daily_quota_gb          = 1
-cost_budget_amount          = 250
+cost_budget_amount          = 350
 disk_free_percent_threshold = 10
 critical_event_threshold    = 5
 

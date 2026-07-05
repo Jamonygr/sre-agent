@@ -20,7 +20,7 @@ Run this after deploying the `lab` or `full` profile and waiting for Azure Monit
 
 1. Deploy with `environments/lab.tfvars` or `environments/full.tfvars`.
 2. Open Azure Update Manager and review the lab VMs.
-3. Open the `SRE Agent Windows VM Lab - Update Compliance` workbook.
+3. Open the `SRE Agent Azure Lab - Update Compliance` workbook.
 4. Change a monitored Windows setting, service state, or installed feature.
 5. Query recent change data:
 

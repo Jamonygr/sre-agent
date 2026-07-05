@@ -1,12 +1,12 @@
-# SRE Agent Windows VM Lab Wiki
+# SRE Agent Azure Lab Wiki
 
-This wiki documents the Azure-native SRE lab: how Terraform builds the Windows targets, how telemetry flows into Azure Monitor, and how guided runbooks support incident response.
+This wiki documents the Azure-native SRE lab: how Terraform builds Windows targets and optional app-platform services, how telemetry flows into Azure Monitor, and how guided runbooks support incident response.
 
 ## Start Here
 
 | Step | Page | Purpose |
 | --- | --- | --- |
-| 1 | [Architecture overview](architecture/overview.md) | Resource groups, networks, Windows targets, SRE resources, and guardrails |
+| 1 | [Architecture overview](architecture/overview.md) | Resource groups, networks, Windows and app-platform targets, SRE resources, and guardrails |
 | 2 | [Monitoring and dashboards](architecture/monitoring-and-dashboards.md) | AMA, DCR, Log Analytics, KQL alerts, Workbooks, and dashboards |
 | 3 | [Update management](architecture/update-management.md) | Update Manager, PatchGroup tags, backup, policy, budgets, and runbooks |
 | 4 | [Variables reference](reference/variables.md) | Feature flags, VM settings, thresholds, and cost controls |
@@ -16,7 +16,7 @@ This wiki documents the Azure-native SRE lab: how Terraform builds the Windows t
 
 ### SRE Lab Architecture
 
-[![SRE Agent Windows VM Lab architecture](images/architecture-overview.svg)](architecture/overview.md)
+[![SRE Agent Azure Lab architecture](images/architecture-overview.svg)](architecture/overview.md)
 
 ### Telemetry And Remediation
 
@@ -32,7 +32,7 @@ This wiki documents the Azure-native SRE lab: how Terraform builds the Windows t
 
 | Page | What it covers |
 | --- | --- |
-| [Architecture overview](architecture/overview.md) | Resource groups, network topology, Windows targets, SRE resources, optional add-ons |
+| [Architecture overview](architecture/overview.md) | Resource groups, network topology, Windows targets, app-platform services, SRE resources, optional add-ons |
 | [Monitoring and dashboards](architecture/monitoring-and-dashboards.md) | Telemetry collection, metric alerts, KQL alerts, Workbooks, dashboards |
 | [Update management](architecture/update-management.md) | Maintenance configurations, dynamic scopes, patch tags, backup, policy, budgets |
 
@@ -63,5 +63,5 @@ This wiki documents the Azure-native SRE lab: how Terraform builds the Windows t
 - Azure subscription with Contributor access. Policy and role assignments may need elevated permissions.
 - Terraform 1.9 or later locally.
 - Azure CLI signed in with `az login`.
-- Cost awareness: start with `cheap-lab`; Firewall, VPN Gateway, Backup, extra VMs, and Managed Grafana can add material cost.
+- Cost awareness: start with `cheap-lab`; AKS, App Service plans, Firewall, VPN Gateway, Backup, extra VMs, and Managed Grafana can add material cost.
 - Keep `enable_alert_runbook_webhooks = false` until you intentionally want alert-triggered runbook execution.

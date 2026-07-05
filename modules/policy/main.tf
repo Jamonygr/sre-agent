@@ -4,7 +4,7 @@ resource "azurerm_policy_definition" "require_tag" {
   name         = "sreag-require-tag-${lower(each.value)}-${var.name_suffix}"
   policy_type  = "Custom"
   mode         = "Indexed"
-  display_name = "SRE Agent Windows VM Lab require tag ${each.value}"
+  display_name = "SRE Agent Azure Lab require tag ${each.value}"
   description  = "Requires tag ${each.value} on resources in the SRE agent lab."
 
   metadata = jsonencode({
@@ -36,7 +36,7 @@ resource "azurerm_policy_definition" "allowed_locations" {
   name         = "sreag-allowed-locations-${var.name_suffix}"
   policy_type  = "Custom"
   mode         = "Indexed"
-  display_name = "SRE Agent Windows VM Lab allowed locations"
+  display_name = "SRE Agent Azure Lab allowed locations"
   description  = "Audits resources outside approved lab regions."
 
   metadata = jsonencode({

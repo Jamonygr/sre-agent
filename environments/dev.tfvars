@@ -37,6 +37,10 @@ deploy_domain_controller             = false
 deploy_sql_vm                        = false
 deploy_firewall                      = false
 deploy_vpn_gateway                   = false
+deploy_aks                           = false
+deploy_app_service                   = false
+deploy_container_apps                = false
+deploy_functions                     = false
 
 enable_jumpbox_public_ip = false
 enable_iis_public_ip     = false

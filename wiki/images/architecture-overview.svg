@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-label="SRE Agent Windows VM Lab architecture overview">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-label="SRE Agent Azure Lab architecture overview">
   <defs>
     <style>
       .title{font:700 30px Segoe UI,Arial,sans-serif;fill:#0f172a}
@@ -17,7 +17,7 @@
     </marker>
   </defs>
   <rect width="1200" height="680" fill="#eef6ff"/>
-  <text x="48" y="58" class="title">SRE Agent Windows VM Lab Architecture</text>
+  <text x="48" y="58" class="title">SRE Agent Azure Lab Architecture</text>
   <text x="50" y="86" class="t">Terraform provisions the lab. Azure Monitor observes. Automation runbooks remediate guided scenarios.</text>
 
   <rect x="55" y="125" width="250" height="455" class="rg"/>

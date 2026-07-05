@@ -1,9 +1,9 @@
 # Architecture Overview
 
-SRE Agent Windows VM Lab uses Terraform to create a small, repeatable Azure environment for Windows VM incident response. The design is intentionally modular so `cheap-lab` can stay small while `full` can add more targets, backup, and optional network controls.
+SRE Agent Azure Lab uses Terraform to create a small, repeatable Azure environment for incident response and operations practice. The design is intentionally modular so `cheap-lab` can stay small while `lab` and `full` can add modern app-platform targets, backup, and optional network controls.
 
 <p align="center">
-  <img src="../images/architecture-overview.svg" alt="SRE Agent Windows VM Lab architecture" width="1000" />
+  <img src="../images/architecture-overview.svg" alt="SRE Agent Azure Lab architecture" width="1000" />
 </p>
 
 ## Resource Groups
@@ -12,6 +12,7 @@ SRE Agent Windows VM Lab uses Terraform to create a small, repeatable Azure envi
 | --- | --- |
 | `network` | Hub, management, and workload VNets, subnets, NSGs, peering, optional Firewall/VPN |
 | `windows` | Jumpbox, IIS VM targets, optional domain-controller-style and SQL/file targets |
+| `apps` | Optional AKS, App Service, Container Apps, and Functions targets |
 | `sre` | Log Analytics, Data Collection Rules, alerts, Workbooks, dashboard, SRE Automation Account, optional Backup |
 | `governance` | Optional Azure Policy assignments and supporting guardrails |
 
@@ -21,6 +22,7 @@ SRE Agent Windows VM Lab uses Terraform to create a small, repeatable Azure envi
 - Workload VNet hosts one or more IIS Windows VMs.
 - Hub, management, and workload VNets are peered for lab connectivity.
 - Windows targets receive Azure Monitor Agent when monitoring is enabled.
+- Optional app-platform targets are deployed into a separate apps resource group for Resource Health and service operations practice.
 - Public IIS access is controlled by `allowed_http_source_ips`; public RDP is disabled unless trusted CIDRs are supplied.
 
 ## SRE Control Plane

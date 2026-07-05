@@ -1,4 +1,4 @@
-module sre-agent-windows-vm-lab-tests
+module sre-agent-azure-lab-tests
 
 go 1.21
 

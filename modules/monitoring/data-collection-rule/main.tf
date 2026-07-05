@@ -90,5 +90,5 @@ resource "azurerm_monitor_data_collection_rule_association" "vm" {
   name                    = "dcr-association-${substr(md5(each.value), 0, 8)}"
   target_resource_id      = each.value
   data_collection_rule_id = azurerm_monitor_data_collection_rule.vm_ops.id
-  description             = "SRE Agent Windows VM Lab VM telemetry collection"
+  description             = "SRE Agent Azure Lab VM telemetry collection"
 }

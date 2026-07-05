@@ -18,6 +18,7 @@ sreag-lab-wus2
 | --- | --- |
 | Network RG | `rg-network-sreag-lab-wus2` |
 | Windows RG | `rg-windows-sreag-lab-wus2` |
+| Apps RG | `rg-apps-sreag-lab-wus2` |
 | SRE RG | `rg-sre-sreag-lab-wus2` |
 | Governance RG | `rg-governance-sreag-lab-wus2` |
 | Hub VNet | `vnet-hub-sreag-lab-wus2` |
@@ -26,6 +27,10 @@ sreag-lab-wus2
 | DCR | `dcr-vm-ops-sreag-lab-wus2` |
 | SRE Automation Account | `aa-sre-sreag-lab-wus2` |
 | Action Group | `ag-sre-sreag-lab-wus2` |
+| AKS | `aks-sreag-lab-wus2` |
+| App Service | `app-sreag-lab-wus2-<suffix>` |
+| Container App | `ca-sreag-lab-wus2` |
+| Function App | `func-sreag-lab-wus2-<suffix>` |
 
 ## Tags
 

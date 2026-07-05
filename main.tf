@@ -77,6 +77,15 @@ module "rg_windows" {
   tags     = local.common_tags
 }
 
+module "rg_apps" {
+  source = "./modules/resource-group"
+  count  = local.deploy_app_platform_targets ? 1 : 0
+
+  name     = "rg-apps-${local.base_name}"
+  location = var.location
+  tags     = local.common_tags
+}
+
 module "rg_sre" {
   source   = "./modules/resource-group"
   name     = "rg-sre-${local.base_name}"
@@ -414,6 +423,68 @@ module "sql_vm" {
 }
 
 # =============================================================================
+# MODERN APP PLATFORM TARGETS
+# =============================================================================
+
+module "aks" {
+  source = "./modules/app-platform/aks"
+  count  = var.deploy_aks ? 1 : 0
+
+  name                       = "aks-${local.base_name}"
+  dns_prefix                 = local.app_dns_prefix
+  resource_group_name        = coalesce(local.app_resource_group_name, "")
+  location                   = var.location
+  node_count                 = var.aks_node_count
+  node_vm_size               = var.aks_node_vm_size
+  os_disk_size_gb            = var.aks_os_disk_size_gb
+  azure_policy_enabled       = var.aks_azure_policy_enabled
+  log_analytics_workspace_id = local.log_analytics_workspace_id
+  tags                       = merge(local.common_tags, { Role = "AKS" })
+}
+
+module "app_service" {
+  source = "./modules/app-platform/app-service"
+  count  = var.deploy_app_service ? 1 : 0
+
+  plan_name           = "asp-web-${local.base_name}"
+  app_name            = "app-${local.base_name}-${local.app_global_suffix}"
+  resource_group_name = coalesce(local.app_resource_group_name, "")
+  location            = var.location
+  sku_name            = var.app_service_plan_sku_name
+  always_on           = var.app_service_always_on
+  tags                = merge(local.common_tags, { Role = "AppService" })
+}
+
+module "container_apps" {
+  source = "./modules/app-platform/container-apps"
+  count  = var.deploy_container_apps ? 1 : 0
+
+  environment_name           = "cae-${local.base_name}"
+  container_app_name         = "ca-${local.base_name}"
+  resource_group_name        = coalesce(local.app_resource_group_name, "")
+  location                   = var.location
+  log_analytics_workspace_id = local.log_analytics_workspace_id
+  image                      = var.container_app_image
+  min_replicas               = var.container_app_min_replicas
+  max_replicas               = var.container_app_max_replicas
+  tags                       = merge(local.common_tags, { Role = "ContainerApps" })
+}
+
+module "functions" {
+  source = "./modules/app-platform/functions"
+  count  = var.deploy_functions ? 1 : 0
+
+  plan_name            = "asp-func-${local.base_name}"
+  function_app_name    = "func-${local.base_name}-${local.app_global_suffix}"
+  storage_account_name = local.function_storage_name
+  resource_group_name  = coalesce(local.app_resource_group_name, "")
+  location             = var.location
+  sku_name             = var.function_app_plan_sku_name
+  node_version         = var.function_app_node_version
+  tags                 = merge(local.common_tags, { Role = "Functions" })
+}
+
+# =============================================================================
 # MONITORING, UPDATE MANAGEMENT, DASHBOARDS
 # =============================================================================
 
@@ -459,12 +530,15 @@ module "alerts" {
   deploy_service_health_alerts         = var.deploy_service_health_alerts
   deploy_resource_health_alerts        = var.deploy_resource_health_alerts
   deploy_advisor_recommendation_alerts = var.deploy_advisor_recommendation_alerts
-  resource_health_resource_groups = [
-    module.rg_network.name,
-    module.rg_windows.name,
-    module.rg_sre.name,
-    module.rg_governance.name
-  ]
+  resource_health_resource_groups = concat(
+    [
+      module.rg_network.name,
+      module.rg_windows.name,
+      module.rg_sre.name,
+      module.rg_governance.name
+    ],
+    local.deploy_app_platform_targets ? [local.app_resource_group_name] : []
+  )
   resource_health_resource_types   = var.resource_health_alert_resource_types
   resource_health_current_statuses = var.resource_health_alert_current_statuses
   vm_cpu_threshold                 = var.vm_cpu_threshold
@@ -571,12 +645,15 @@ module "policy" {
   count  = var.deploy_policy ? 1 : 0
 
   name_suffix = local.base_name
-  resource_group_ids = {
-    network    = module.rg_network.id
-    windows    = module.rg_windows.id
-    sre        = module.rg_sre.id
-    governance = module.rg_governance.id
-  }
+  resource_group_ids = merge(
+    {
+      network    = module.rg_network.id
+      windows    = module.rg_windows.id
+      sre        = module.rg_sre.id
+      governance = module.rg_governance.id
+    },
+    local.deploy_app_platform_targets ? { apps = local.app_resource_group_id } : {}
+  )
   allowed_locations = var.policy_allowed_locations
   required_tags     = var.policy_required_tags
 }

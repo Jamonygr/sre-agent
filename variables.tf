@@ -35,7 +35,7 @@ variable "owner" {
 variable "repository_url" {
   description = "Git repository URL."
   type        = string
-  default     = "https://github.com/Jamonygr/sre-agent-windows-vm-lab"
+  default     = "https://github.com/Jamonygr/sre-agent"
 }
 
 variable "extra_tags" {
@@ -351,8 +351,32 @@ variable "deploy_vpn_gateway" {
   default     = false
 }
 
+variable "deploy_aks" {
+  description = "Deploy an Azure Kubernetes Service cluster as a modern app-platform lab target."
+  type        = bool
+  default     = false
+}
+
+variable "deploy_app_service" {
+  description = "Deploy an Azure App Service Linux Web App as a modern app-platform lab target."
+  type        = bool
+  default     = false
+}
+
+variable "deploy_container_apps" {
+  description = "Deploy Azure Container Apps environment and sample app as a modern app-platform lab target."
+  type        = bool
+  default     = false
+}
+
+variable "deploy_functions" {
+  description = "Deploy an Azure Functions Linux Function App as a modern app-platform lab target."
+  type        = bool
+  default     = false
+}
+
 # -----------------------------------------------------------------------------
-# Compute and access
+# Compute, app platform, and access
 # -----------------------------------------------------------------------------
 
 variable "vm_size" {
@@ -426,6 +450,92 @@ variable "allowed_http_source_ips" {
   validation {
     condition     = alltrue([for cidr in var.allowed_http_source_ips : can(cidrhost(cidr, 0))])
     error_message = "Every allowed HTTP source must be a valid CIDR block."
+  }
+}
+
+variable "aks_node_count" {
+  description = "AKS system node pool node count."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.aks_node_count >= 1 && var.aks_node_count <= 5 && floor(var.aks_node_count) == var.aks_node_count
+    error_message = "AKS node count must be a whole number between 1 and 5."
+  }
+}
+
+variable "aks_node_vm_size" {
+  description = "AKS system node pool VM size."
+  type        = string
+  default     = "Standard_B2s"
+}
+
+variable "aks_os_disk_size_gb" {
+  description = "AKS system node pool OS disk size in GB."
+  type        = number
+  default     = 64
+
+  validation {
+    condition     = var.aks_os_disk_size_gb >= 30 && floor(var.aks_os_disk_size_gb) == var.aks_os_disk_size_gb
+    error_message = "AKS OS disk size must be a whole number of at least 30 GB."
+  }
+}
+
+variable "aks_azure_policy_enabled" {
+  description = "Enable Azure Policy add-on for AKS."
+  type        = bool
+  default     = false
+}
+
+variable "app_service_plan_sku_name" {
+  description = "App Service Linux plan SKU."
+  type        = string
+  default     = "B1"
+}
+
+variable "app_service_always_on" {
+  description = "Enable Always On for App Service. Keep false when using free or shared SKUs."
+  type        = bool
+  default     = false
+}
+
+variable "function_app_plan_sku_name" {
+  description = "Linux Function App plan SKU."
+  type        = string
+  default     = "Y1"
+}
+
+variable "function_app_node_version" {
+  description = "Linux Function App Node.js runtime version."
+  type        = string
+  default     = "20"
+}
+
+variable "container_app_image" {
+  description = "Container image for the demo Azure Container App."
+  type        = string
+  default     = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+}
+
+variable "container_app_min_replicas" {
+  description = "Minimum replicas for the demo Azure Container App."
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.container_app_min_replicas >= 0 && floor(var.container_app_min_replicas) == var.container_app_min_replicas
+    error_message = "Container App min replicas must be a whole number of at least 0."
+  }
+}
+
+variable "container_app_max_replicas" {
+  description = "Maximum replicas for the demo Azure Container App."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.container_app_max_replicas >= 1 && floor(var.container_app_max_replicas) == var.container_app_max_replicas
+    error_message = "Container App max replicas must be a whole number of at least 1."
   }
 }
 
@@ -513,6 +623,11 @@ variable "resource_health_alert_resource_types" {
   type        = list(string)
   default = [
     "Microsoft.Compute/virtualMachines",
+    "Microsoft.ContainerService/managedClusters",
+    "Microsoft.App/containerApps",
+    "Microsoft.App/managedEnvironments",
+    "Microsoft.Web/sites",
+    "Microsoft.Web/serverfarms",
     "Microsoft.Network/azureFirewalls",
     "Microsoft.Network/publicIPAddresses",
     "Microsoft.OperationalInsights/workspaces",
