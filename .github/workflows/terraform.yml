@@ -68,11 +68,31 @@ jobs:
       - name: Terraform fmt
         run: terraform fmt -check -recursive
 
+      - name: Reserved wording scan
+        shell: bash
+        run: |
+          if git grep -I -n -E '[mM][vV][pP]' -- . ':(exclude).git' ':(exclude).terraform'; then
+            echo "Reserved wording found."
+            exit 1
+          fi
+
       - name: Terraform init without backend
         run: terraform init -backend=false -reconfigure
 
       - name: Terraform validate
         run: terraform validate
+
+      - name: PowerShell parser checks
+        shell: pwsh
+        run: |
+          Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref] $tokens, [ref] $errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              throw "$($_.Name): $($errors.Message -join '; ')"
+            }
+          }
 
       - name: Terratest compile check
         run: go test -v -run '^$' ./...

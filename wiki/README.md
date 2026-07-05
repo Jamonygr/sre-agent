@@ -9,8 +9,9 @@ This wiki documents the Azure-native SRE lab: how Terraform builds Windows targe
 | 1 | [Architecture overview](architecture/overview.md) | Resource groups, networks, Windows and app-platform targets, SRE resources, and guardrails |
 | 2 | [Monitoring and dashboards](architecture/monitoring-and-dashboards.md) | AMA, DCR, Log Analytics, KQL alerts, Workbooks, and dashboards |
 | 3 | [Update management](architecture/update-management.md) | Update Manager, PatchGroup tags, backup, policy, budgets, and runbooks |
-| 4 | [Variables reference](reference/variables.md) | Feature flags, VM settings, thresholds, and cost controls |
-| 5 | [Pipeline](reference/pipeline.md) | GitHub Actions validation, plan, apply, smoke tests, and destroy |
+| 4 | [Operational readiness](../docs/operational-readiness.md) | Security, reliability, cost, governance, and operations review points |
+| 5 | [Variables reference](reference/variables.md) | Feature flags, VM settings, thresholds, and cost controls |
+| 6 | [Pipeline](reference/pipeline.md) | GitHub Actions validation, plan, apply, smoke tests, and destroy |
 
 ## Architecture Snapshots
 
@@ -35,6 +36,7 @@ This wiki documents the Azure-native SRE lab: how Terraform builds Windows targe
 | [Architecture overview](architecture/overview.md) | Resource groups, network topology, Windows targets, app-platform services, SRE resources, optional add-ons |
 | [Monitoring and dashboards](architecture/monitoring-and-dashboards.md) | Telemetry collection, metric alerts, KQL alerts, Workbooks, dashboards |
 | [Update management](architecture/update-management.md) | Maintenance configurations, dynamic scopes, patch tags, backup, policy, budgets |
+| [Operational readiness](../docs/operational-readiness.md) | Review checklist for quality gates, safety, cost, and handoff |
 
 ### Scenarios
 

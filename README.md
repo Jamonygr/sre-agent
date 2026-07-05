@@ -22,10 +22,11 @@ The lab is intentionally Azure-native: Terraform provisions the platform, Azure 
 | Step | Command or file | What it proves |
 | --- | --- | --- |
 | Lowest-cost profile | `environments/cheap-lab.tfvars` | One jumpbox, one IIS target, native monitoring, SRE runbooks, no premium network services |
-| Terraform validation | `terraform fmt -check -recursive` and `terraform validate` | HCL formatting and provider schema validity |
-| No-apply plan | `.\scripts\Invoke-LocalPlan.ps1 -VarFile environments/cheap-lab.tfvars` | Azure graph can be planned before creating resources |
+| Quality gate | `.\scripts\Invoke-QualityGate.ps1` | Formatting, validation, script parsing, compile checks, reserved wording, and no-refresh plans |
+| No-apply plan | `.\scripts\Invoke-LocalPlan.ps1 -VarFile environments/lab.tfvars` | Azure graph can be planned before creating resources |
 | Script validation | `.\scripts\Invoke-SreLabValidation.ps1` | Resource groups, telemetry, alerts, AMA, and runbooks exist after deployment |
 | Incident exercises | `.\scripts\Invoke-SreIncident.ps1 -Scenario IisOutage` | Lab can generate signals for alert and remediation practice |
+| Readiness review | [Operational readiness](docs/operational-readiness.md) | Security, reliability, cost, governance, and operations review points |
 
 ## Architecture
 
@@ -33,7 +34,7 @@ The lab is intentionally Azure-native: Terraform provisions the platform, Azure 
   <img src="docs/images/architecture-overview.svg" alt="SRE Agent Azure Lab architecture" width="1100" />
 </p>
 
-The deployment creates four main resource-group roles:
+The deployment creates five main resource-group roles:
 
 | Role | Purpose |
 | --- | --- |
@@ -143,6 +144,7 @@ terraform fmt -check -recursive
 terraform init -backend=false -reconfigure
 terraform validate
 .\scripts\Invoke-LocalPlan.ps1 -VarFile environments/cheap-lab.tfvars
+.\scripts\Invoke-QualityGate.ps1 -SkipPlans
 Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
   $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$null)
 }
@@ -164,6 +166,7 @@ Terratest smoke tests live in `tests/` and skip live Azure checks when `ARM_SUBS
 - [Architecture overview](wiki/architecture/overview.md)
 - [Monitoring and dashboards](wiki/architecture/monitoring-and-dashboards.md)
 - [Update management](wiki/architecture/update-management.md)
+- [Operational readiness](docs/operational-readiness.md)
 - [Variables reference](wiki/reference/variables.md)
 - [Outputs reference](wiki/reference/outputs.md)
 - [Pipeline](wiki/reference/pipeline.md)

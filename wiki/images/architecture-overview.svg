@@ -2,7 +2,7 @@
   <defs>
     <style>
       .title{font:700 30px Segoe UI,Arial,sans-serif;fill:#0f172a}
-      .h{font:700 17px Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .h{font:700 16px Segoe UI,Arial,sans-serif;fill:#0f172a}
       .t{font:500 14px Segoe UI,Arial,sans-serif;fill:#334155}
       .small{font:600 12px Segoe UI,Arial,sans-serif;fill:#475569}
       .rg{fill:#f8fafc;stroke:#94a3b8;stroke-width:2;rx:10}
@@ -10,6 +10,7 @@
       .line{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#arrow)}
       .soft{fill:#ecfeff;stroke:#06b6d4}
       .green{fill:#f0fdf4;stroke:#22c55e}
+      .violet{fill:#f5f3ff;stroke:#8b5cf6}
       .amber{fill:#fffbeb;stroke:#f59e0b}
     </style>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
@@ -18,63 +19,74 @@
   </defs>
   <rect width="1200" height="680" fill="#eef6ff"/>
   <text x="48" y="58" class="title">SRE Agent Azure Lab Architecture</text>
-  <text x="50" y="86" class="t">Terraform provisions the lab. Azure Monitor observes. Automation runbooks remediate guided scenarios.</text>
+  <text x="50" y="86" class="t">Terraform provisions Windows and app-platform targets. Azure Monitor observes. Automation supports guided remediation.</text>
 
-  <rect x="55" y="125" width="250" height="455" class="rg"/>
-  <text x="78" y="160" class="h">rg-network</text>
-  <rect x="80" y="190" width="200" height="75" class="card soft"/>
-  <text x="102" y="220" class="h">Hub VNet</text>
-  <text x="102" y="245" class="small">management subnet</text>
-  <rect x="80" y="295" width="200" height="75" class="card soft"/>
-  <text x="102" y="325" class="h">Workload VNet</text>
-  <text x="102" y="350" class="small">IIS web subnet</text>
-  <rect x="80" y="400" width="200" height="75" class="card soft"/>
-  <text x="102" y="430" class="h">Optional Network</text>
-  <text x="102" y="455" class="small">Firewall, VPN, NSGs</text>
+  <rect x="35" y="125" width="205" height="455" class="rg"/>
+  <text x="58" y="160" class="h">rg-network</text>
+  <rect x="58" y="190" width="160" height="75" class="card soft"/>
+  <text x="78" y="220" class="h">Hub VNet</text>
+  <text x="78" y="245" class="small">ops subnet</text>
+  <rect x="58" y="295" width="160" height="75" class="card soft"/>
+  <text x="78" y="325" class="h">Workload VNet</text>
+  <text x="78" y="350" class="small">web + app subnets</text>
+  <rect x="58" y="400" width="160" height="75" class="card soft"/>
+  <text x="78" y="430" class="h">Optional Network</text>
+  <text x="78" y="455" class="small">Firewall, VPN, NSGs</text>
 
-  <rect x="365" y="125" width="250" height="455" class="rg"/>
-  <text x="388" y="160" class="h">rg-windows</text>
-  <rect x="390" y="190" width="200" height="75" class="card green"/>
-  <text x="412" y="220" class="h">Jumpbox</text>
-  <text x="412" y="245" class="small">private admin target</text>
-  <rect x="390" y="295" width="200" height="75" class="card green"/>
-  <text x="412" y="325" class="h">IIS VM 01</text>
-  <text x="412" y="350" class="small">default incident target</text>
-  <rect x="390" y="400" width="200" height="75" class="card green"/>
-  <text x="412" y="430" class="h">Optional VMs</text>
-  <text x="412" y="455" class="small">IIS 02, DC, SQL/file</text>
+  <rect x="265" y="125" width="205" height="455" class="rg"/>
+  <text x="288" y="160" class="h">rg-windows</text>
+  <rect x="288" y="190" width="160" height="75" class="card green"/>
+  <text x="308" y="220" class="h">Jumpbox</text>
+  <text x="308" y="245" class="small">private admin target</text>
+  <rect x="288" y="295" width="160" height="75" class="card green"/>
+  <text x="308" y="325" class="h">IIS VMs</text>
+  <text x="308" y="350" class="small">incident targets</text>
+  <rect x="288" y="400" width="160" height="75" class="card green"/>
+  <text x="308" y="430" class="h">Optional VMs</text>
+  <text x="308" y="455" class="small">DC, SQL/file</text>
 
-  <rect x="675" y="125" width="320" height="455" class="rg"/>
-  <text x="698" y="160" class="h">rg-sre</text>
-  <rect x="700" y="190" width="250" height="65" class="card"/>
-  <text x="724" y="218" class="h">Log Analytics</text>
-  <text x="724" y="240" class="small">Perf, Event, Heartbeat</text>
-  <rect x="700" y="275" width="250" height="65" class="card"/>
-  <text x="724" y="303" class="h">DCR + AMA</text>
-  <text x="724" y="325" class="small">VM telemetry collection</text>
-  <rect x="700" y="360" width="250" height="65" class="card"/>
-  <text x="724" y="388" class="h">Alerts + Workbooks</text>
-  <text x="724" y="410" class="small">Metric and KQL rules</text>
-  <rect x="700" y="445" width="250" height="65" class="card"/>
-  <text x="724" y="473" class="h">SRE Automation</text>
-  <text x="724" y="495" class="small">Runbooks and optional webhooks</text>
+  <rect x="495" y="125" width="205" height="455" class="rg"/>
+  <text x="518" y="160" class="h">rg-apps</text>
+  <rect x="518" y="190" width="160" height="60" class="card violet"/>
+  <text x="538" y="225" class="h">AKS</text>
+  <rect x="518" y="270" width="160" height="60" class="card violet"/>
+  <text x="538" y="305" class="h">App Service</text>
+  <rect x="518" y="350" width="160" height="60" class="card violet"/>
+  <text x="538" y="385" class="h">Container Apps</text>
+  <rect x="518" y="430" width="160" height="60" class="card violet"/>
+  <text x="538" y="465" class="h">Functions</text>
 
-  <rect x="1030" y="125" width="120" height="455" class="rg"/>
-  <text x="1050" y="160" class="h">govern</text>
-  <rect x="1048" y="205" width="84" height="70" class="card amber"/>
-  <text x="1065" y="235" class="small">Policy</text>
-  <text x="1065" y="255" class="small">Tags</text>
-  <rect x="1048" y="320" width="84" height="70" class="card amber"/>
-  <text x="1065" y="350" class="small">Budget</text>
-  <text x="1065" y="370" class="small">Cost</text>
-  <rect x="1048" y="435" width="84" height="70" class="card amber"/>
-  <text x="1065" y="465" class="small">Update</text>
-  <text x="1065" y="485" class="small">Backup</text>
+  <rect x="725" y="125" width="225" height="455" class="rg"/>
+  <text x="748" y="160" class="h">rg-sre</text>
+  <rect x="748" y="190" width="180" height="65" class="card"/>
+  <text x="770" y="218" class="h">Log Analytics</text>
+  <text x="770" y="240" class="small">Perf, Event, Heartbeat</text>
+  <rect x="748" y="275" width="180" height="65" class="card"/>
+  <text x="770" y="303" class="h">DCR + AMA</text>
+  <text x="770" y="325" class="small">VM telemetry</text>
+  <rect x="748" y="360" width="180" height="65" class="card"/>
+  <text x="770" y="388" class="h">Alerts + Workbooks</text>
+  <text x="770" y="410" class="small">Metric, KQL, health</text>
+  <rect x="748" y="445" width="180" height="65" class="card"/>
+  <text x="770" y="473" class="h">Automation</text>
+  <text x="770" y="495" class="small">Runbooks, webhooks</text>
 
-  <path class="line" d="M280 228 H388"/>
-  <path class="line" d="M280 333 H388"/>
-  <path class="line" d="M590 330 H700"/>
-  <path class="line" d="M825 340 V360"/>
-  <path class="line" d="M825 425 V445"/>
-  <path class="line" d="M950 392 H1048"/>
+  <rect x="980" y="125" width="180" height="455" class="rg"/>
+  <text x="1003" y="160" class="h">rg-governance</text>
+  <rect x="1003" y="205" width="134" height="70" class="card amber"/>
+  <text x="1025" y="235" class="h">Policy</text>
+  <text x="1025" y="255" class="small">tags + locations</text>
+  <rect x="1003" y="320" width="134" height="70" class="card amber"/>
+  <text x="1025" y="350" class="h">Budget</text>
+  <text x="1025" y="370" class="small">cost guardrail</text>
+  <rect x="1003" y="435" width="134" height="70" class="card amber"/>
+  <text x="1025" y="465" class="h">Update + Backup</text>
+  <text x="1025" y="485" class="small">optional controls</text>
+
+  <path class="line" d="M218 228 H288"/>
+  <path class="line" d="M448 330 H748"/>
+  <path class="line" d="M678 350 H748"/>
+  <path class="line" d="M837 340 V360"/>
+  <path class="line" d="M837 425 V445"/>
+  <path class="line" d="M928 392 H1003"/>
 </svg>

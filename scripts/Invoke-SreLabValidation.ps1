@@ -3,6 +3,7 @@ param(
     [string] $Environment = "lab",
     [string] $Project = "sreag",
     [string] $LocationShort = "wus2",
+    [switch] $ValidateAppPlatform,
     [switch] $SkipAzLoginCheck
 )
 
@@ -60,10 +61,25 @@ $resourceGroups = @{
     Sre        = "rg-sre-$baseName"
     Governance = "rg-governance-$baseName"
 }
+$appsResourceGroup = "rg-apps-$baseName"
 
 foreach ($entry in $resourceGroups.GetEnumerator()) {
     $exists = az group exists --name $entry.Value | ConvertFrom-Json
     Write-Check -Name "$($entry.Key) resource group exists" -Passed $exists -Detail $entry.Value
+}
+
+$appsResourceGroupExists = az group exists --name $appsResourceGroup | ConvertFrom-Json
+if ($ValidateAppPlatform -or $appsResourceGroupExists) {
+    Write-Check -Name "Apps resource group exists" -Passed $appsResourceGroupExists -Detail $appsResourceGroup
+
+    if ($appsResourceGroupExists) {
+        Write-Check -Name "AKS cluster exists" -Passed ((Get-ResourceCount -ResourceGroupName $appsResourceGroup -ResourceType "Microsoft.ContainerService/managedClusters") -gt 0) -Detail $appsResourceGroup
+        Write-Check -Name "Container Apps environment exists" -Passed ((Get-ResourceCount -ResourceGroupName $appsResourceGroup -ResourceType "Microsoft.App/managedEnvironments") -gt 0) -Detail $appsResourceGroup
+        Write-Check -Name "Container App exists" -Passed ((Get-ResourceCount -ResourceGroupName $appsResourceGroup -ResourceType "Microsoft.App/containerApps") -gt 0) -Detail $appsResourceGroup
+        Write-Check -Name "App Service plans exist" -Passed ((Get-ResourceCount -ResourceGroupName $appsResourceGroup -ResourceType "Microsoft.Web/serverfarms") -ge 2) -Detail $appsResourceGroup
+        Write-Check -Name "App Service and Function App sites exist" -Passed ((Get-ResourceCount -ResourceGroupName $appsResourceGroup -ResourceType "Microsoft.Web/sites") -ge 2) -Detail $appsResourceGroup
+        Write-Check -Name "Function App storage account exists" -Passed ((Get-ResourceCount -ResourceGroupName $appsResourceGroup -ResourceType "Microsoft.Storage/storageAccounts") -gt 0) -Detail $appsResourceGroup
+    }
 }
 
 Write-Check -Name "Hub VNet exists" -Passed ((Get-ResourceCount -ResourceGroupName $resourceGroups.Network -ResourceType "Microsoft.Network/virtualNetworks") -ge 3) -Detail $resourceGroups.Network

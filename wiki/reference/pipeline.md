@@ -6,7 +6,7 @@ The GitHub Actions workflow in `.github/workflows/terraform.yml` follows the sam
 
 | Stage | What it does |
 | --- | --- |
-| Format and validate | `terraform fmt`, backend-free init, `terraform validate`, Terratest compile |
+| Format and validate | `terraform fmt`, reserved wording scan, backend-free init, `terraform validate`, PowerShell parser checks, Terratest compile |
 | Security scans | Gitleaks, tfsec, Checkov |
 | Lint | TFLint |
 | Plan | Azure login through OIDC, Terraform plan, plan artifact upload |
@@ -33,4 +33,4 @@ The GitHub Actions workflow in `.github/workflows/terraform.yml` follows the sam
 | `TF_STATE_SA` | Remote state storage account |
 | `ADMIN_PASSWORD` | Windows VM admin password |
 
-Local validation can use `terraform init -backend=false -reconfigure` for `terraform validate`. For a backend-free no-apply graph plan, use `.\scripts\Invoke-LocalPlan.ps1 -VarFile environments/cheap-lab.tfvars`; the helper copies the repo to a temporary folder and removes `backend.tf` only in that temporary copy.
+Local validation can use `.\scripts\Invoke-QualityGate.ps1` for the full local pass. For a backend-free no-apply graph plan, use `.\scripts\Invoke-LocalPlan.ps1 -VarFile environments/cheap-lab.tfvars`; the helper copies the repo to a temporary folder and removes `backend.tf` only in that temporary copy.

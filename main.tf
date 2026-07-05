@@ -381,7 +381,7 @@ module "iis_web_servers" {
   enable_public_ip            = var.enable_iis_public_ip
   install_azure_monitor_agent = var.deploy_monitoring && var.deploy_azure_monitor_agent
   install_dependency_agent    = var.deploy_monitoring && var.deploy_vm_insights
-  lab_title                   = "SRE Agent Windows VM Lab IIS Target ${each.value}"
+  lab_title                   = "SRE Agent Azure Lab IIS Target ${each.value}"
   tags                        = merge(local.common_tags, { Role = "IIS", PatchGroup = var.default_patch_group })
 }
 
