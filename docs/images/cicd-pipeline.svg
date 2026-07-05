@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="260" viewBox="0 0 1100 260" role="img" aria-labelledby="title desc">
+  <title id="title">CI/CD Pipeline</title>
+  <desc id="desc">Terraform pipeline stages from format through validation, security, policy, plan, manual apply, and destroy.</desc>
+  <rect width="1100" height="260" fill="#f8fafc"/>
+  <text x="50" y="50" fill="#111827" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">GitHub Actions Pipeline</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="15" text-anchor="middle">
+    <rect x="50" y="105" width="120" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="110" y="141" fill="#111827">fmt</text>
+    <rect x="205" y="105" width="120" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="265" y="141" fill="#111827">validate</text>
+    <rect x="360" y="105" width="120" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="420" y="141" fill="#111827">security</text>
+    <rect x="515" y="105" width="120" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="575" y="141" fill="#111827">plan</text>
+    <rect x="670" y="105" width="120" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="730" y="141" fill="#111827">OPA</text>
+    <rect x="825" y="105" width="120" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="885" y="141" fill="#111827">apply</text>
+    <rect x="980" y="105" width="80" height="60" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="1020" y="141" fill="#111827">destroy</text>
+  </g>
+  <path d="M170 135 H205 M325 135 H360 M480 135 H515 M635 135 H670 M790 135 H825 M945 135 H980" stroke="#64748b" stroke-width="2"/>
+</svg>
+

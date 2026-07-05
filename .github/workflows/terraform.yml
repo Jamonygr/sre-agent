@@ -1,0 +1,287 @@
+name: Terraform Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+      - ".github/**"
+      - "modules/**"
+      - "environments/**"
+      - "policies/**"
+      - "tests/**"
+      - "README.md"
+      - "wiki/**"
+      - "docs/**"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment
+        required: true
+        default: lab
+        type: choice
+        options: [cheap-lab, dev, lab, full]
+      action:
+        description: Action
+        required: true
+        default: plan
+        type: choice
+        options: [plan, apply, destroy]
+      destroy_confirm:
+        description: Type DESTROY to confirm destroy
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+
+concurrency:
+  group: terraform-${{ github.ref }}-${{ github.event.inputs.environment || 'lab' }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.12.0"
+  ENVIRONMENT: ${{ github.event.inputs.environment || 'lab' }}
+
+jobs:
+  fmt-validate:
+    name: Format and Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init without backend
+        run: terraform init -backend=false -reconfigure
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terratest compile check
+        run: go test -v -run '^$' ./...
+        working-directory: tests
+
+  security:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    needs: fmt-validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          soft_fail: true
+
+      - uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform
+          config_file: .checkov.yml
+          soft_fail: true
+
+  lint:
+    name: Terraform Lint
+    runs-on: ubuntu-latest
+    needs: fmt-validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: terraform-linters/setup-tflint@v4
+
+      - name: TFLint init
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: tflint --init
+
+      - name: TFLint
+        run: |
+          tflint --recursive \
+            --disable-rule=terraform_required_version \
+            --disable-rule=terraform_required_providers \
+            --disable-rule=terraform_unused_declarations
+
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    needs: [fmt-validate, security, lint]
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.action != 'destroy'
+    outputs:
+      has_plan: ${{ steps.plan.outcome == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ env.ENVIRONMENT }}.terraform.tfstate" \
+            -backend-config="use_azuread_auth=true"
+
+      - name: Terraform plan
+        id: plan
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          terraform plan -var-file="environments/${{ env.ENVIRONMENT }}.tfvars" -out=tfplan
+          terraform show -json tfplan > tfplan.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ env.ENVIRONMENT }}-${{ github.sha }}
+          path: |
+            tfplan
+            tfplan.json
+
+  policy:
+    name: OPA Policy
+    runs-on: ubuntu-latest
+    needs: plan
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ env.ENVIRONMENT }}-${{ github.sha }}
+          path: .
+
+      - name: Install Conftest
+        run: |
+          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.56.0/conftest_0.56.0_Linux_x86_64.tar.gz -o conftest.tar.gz
+          tar xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/conftest
+
+      - name: Run policies
+        run: conftest test tfplan.json --policy policies
+
+  apply:
+    name: Apply
+    runs-on: ubuntu-latest
+    needs: [plan, policy]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ env.ENVIRONMENT }}-${{ github.sha }}
+          path: .
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ env.ENVIRONMENT }}.terraform.tfstate" \
+            -backend-config="use_azuread_auth=true"
+
+      - name: Terraform apply
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+        run: terraform apply -auto-approve tfplan
+
+      - name: Terratest smoke tests
+        run: go test ./...
+        working-directory: tests
+        env:
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TEST_ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          TEST_LOCATION_SHORT: wus2
+
+  destroy:
+    name: Destroy
+    runs-on: ubuntu-latest
+    needs: fmt-validate
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy' && github.event.inputs.destroy_confirm == 'DESTROY'
+    environment: ${{ github.event.inputs.environment }}-destroy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ env.ENVIRONMENT }}.terraform.tfstate" \
+            -backend-config="use_azuread_auth=true"
+
+      - name: Terraform destroy
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+        run: terraform destroy -auto-approve -var-file="environments/${{ env.ENVIRONMENT }}.tfvars"

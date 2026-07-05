@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">SRE Agent Windows VM Lab</title>
+  <desc id="desc">Operations lab banner with monitoring, update management, automation, backup, and dashboards.</desc>
+  <rect width="1200" height="360" fill="#0f172a"/>
+  <rect x="48" y="48" width="1104" height="264" rx="8" fill="#111827" stroke="#38bdf8" stroke-width="2"/>
+  <text x="86" y="126" fill="#e5f3ff" font-family="Segoe UI, Arial, sans-serif" font-size="52" font-weight="700">SRE Agent Windows VM Lab</text>
+  <text x="88" y="170" fill="#bfdbfe" font-family="Segoe UI, Arial, sans-serif" font-size="22">Terraform-first monitoring, update management, dashboards, automation, backup, and incident response.</text>
+  <g transform="translate(92 222)">
+    <rect width="150" height="58" rx="8" fill="#0369a1"/>
+    <text x="75" y="36" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="17" text-anchor="middle">Monitor</text>
+  </g>
+  <g transform="translate(270 222)">
+    <rect width="150" height="58" rx="8" fill="#166534"/>
+    <text x="75" y="36" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="17" text-anchor="middle">Update</text>
+  </g>
+  <g transform="translate(448 222)">
+    <rect width="150" height="58" rx="8" fill="#7c2d12"/>
+    <text x="75" y="36" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="17" text-anchor="middle">Automate</text>
+  </g>
+  <g transform="translate(626 222)">
+    <rect width="150" height="58" rx="8" fill="#4c1d95"/>
+    <text x="75" y="36" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="17" text-anchor="middle">Dashboard</text>
+  </g>
+  <g transform="translate(804 222)">
+    <rect width="150" height="58" rx="8" fill="#854d0e"/>
+    <text x="75" y="36" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="17" text-anchor="middle">Backup</text>
+  </g>
+  <g transform="translate(982 222)">
+    <rect width="126" height="58" rx="8" fill="#1f2937" stroke="#94a3b8"/>
+    <text x="63" y="36" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="17" text-anchor="middle">Govern</text>
+  </g>
+</svg>
+

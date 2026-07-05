@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420" role="img" aria-labelledby="title desc">
+  <title id="title">Update Management Flow</title>
+  <desc id="desc">Azure Update Manager flow from maintenance configuration to VM assignments and dynamic tag scopes.</desc>
+  <rect width="1100" height="420" fill="#f8fafc"/>
+  <text x="50" y="55" fill="#111827" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Update Management Flow</text>
+  <g fill="#ffffff" stroke="#cbd5e1" stroke-width="2">
+    <rect x="70" y="140" width="230" height="120" rx="8"/>
+    <rect x="390" y="90" width="260" height="100" rx="8"/>
+    <rect x="390" y="230" width="260" height="100" rx="8"/>
+    <rect x="750" y="140" width="260" height="120" rx="8"/>
+  </g>
+  <text x="185" y="190" text-anchor="middle" fill="#4c1d95" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Maintenance Configuration</text>
+  <text x="185" y="220" text-anchor="middle" fill="#334155" font-family="Segoe UI, Arial, sans-serif" font-size="15">Schedule + classifications</text>
+  <text x="520" y="145" text-anchor="middle" fill="#166534" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Static VM Assignments</text>
+  <text x="520" y="285" text-anchor="middle" fill="#166534" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Dynamic PatchGroup Scope</text>
+  <text x="880" y="190" text-anchor="middle" fill="#0369a1" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Windows Server Targets</text>
+  <text x="880" y="220" text-anchor="middle" fill="#334155" font-family="Segoe UI, Arial, sans-serif" font-size="15">Jumpbox, IIS, optional DC/SQL</text>
+  <path d="M300 180 H390" stroke="#64748b" stroke-width="3"/>
+  <path d="M300 220 C350 220 350 280 390 280" stroke="#64748b" stroke-width="3" fill="none"/>
+  <path d="M650 140 C700 140 700 180 750 180" stroke="#64748b" stroke-width="3" fill="none"/>
+  <path d="M650 280 C700 280 700 220 750 220" stroke="#64748b" stroke-width="3" fill="none"/>
+</svg>

@@ -1,0 +1,22 @@
+framework:
+  - terraform
+
+skip-check:
+  # Lab defaults intentionally avoid production-only CMK, private-only, and
+  # premium HA requirements. The hardening docs explain when to enable them.
+  - CKV2_AZURE_1
+  - CKV2_AZURE_21
+  - CKV2_AZURE_32
+  - CKV2_AZURE_33
+  - CKV2_AZURE_38
+  - CKV2_AZURE_40
+  - CKV_AZURE_33
+  - CKV_AZURE_35
+  - CKV_AZURE_50
+  - CKV_AZURE_59
+  - CKV_AZURE_93
+  - CKV_AZURE_119
+  - CKV_AZURE_190
+  - CKV_AZURE_206
+  - CKV_AZURE_229
+

@@ -1,0 +1,59 @@
+# Terraform local state and cache
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Private variable files
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+!environments/*.tfvars
+
+# Terraform generated files
+*.tfplan
+tfplan
+tfplan.*
+*.generated.tf
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Secrets and certificates
+secrets.tf
+secrets.tfvars
+**/secrets/**
+*.cer
+*.pfx
+*.pem
+*.key
+*.crt
+id_rsa
+id_rsa.pub
+
+# Tooling and OS noise
+.azure/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+

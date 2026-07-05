@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="Telemetry and remediation flow">
+  <defs>
+    <style>
+      .title{font:700 28px Segoe UI,Arial,sans-serif;fill:#0f172a}
+      .h{font:700 16px Segoe UI,Arial,sans-serif;fill:#111827}
+      .t{font:500 13px Segoe UI,Arial,sans-serif;fill:#475569}
+      .box{fill:#fff;stroke:#94a3b8;stroke-width:2;rx:9}
+      .blue{fill:#eff6ff;stroke:#3b82f6}
+      .green{fill:#f0fdf4;stroke:#22c55e}
+      .line{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="420" fill="#f8fafc"/>
+  <text x="48" y="55" class="title">Azure-native SRE flow</text>
+  <g transform="translate(55 120)">
+    <rect width="170" height="85" class="box green"/>
+    <text x="24" y="36" class="h">Windows VMs</text>
+    <text x="24" y="60" class="t">IIS, CPU, disk, events</text>
+  </g>
+  <path class="line" d="M235 162 H330"/>
+  <g transform="translate(340 120)">
+    <rect width="170" height="85" class="box blue"/>
+    <text x="24" y="36" class="h">AMA + DCR</text>
+    <text x="24" y="60" class="t">Collect telemetry</text>
+  </g>
+  <path class="line" d="M520 162 H615"/>
+  <g transform="translate(625 120)">
+    <rect width="170" height="85" class="box"/>
+    <text x="24" y="36" class="h">Log Analytics</text>
+    <text x="24" y="60" class="t">Perf, Event, Heartbeat</text>
+  </g>
+  <path class="line" d="M805 162 H900"/>
+  <g transform="translate(910 120)">
+    <rect width="205" height="85" class="box"/>
+    <text x="24" y="36" class="h">Alerts</text>
+    <text x="24" y="60" class="t">Metric + KQL detection</text>
+  </g>
+  <path class="line" d="M1012 210 V285 H835"/>
+  <g transform="translate(615 260)">
+    <rect width="220" height="85" class="box blue"/>
+    <text x="24" y="36" class="h">Action Groups</text>
+    <text x="24" y="60" class="t">Notify, optional runbooks</text>
+  </g>
+  <path class="line" d="M605 302 H510"/>
+  <g transform="translate(260 260)">
+    <rect width="250" height="85" class="box green"/>
+    <text x="24" y="36" class="h">SRE Runbooks</text>
+    <text x="24" y="60" class="t">Restart, start, diagnose, cleanup</text>
+  </g>
+</svg>
