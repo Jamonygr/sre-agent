@@ -11,7 +11,8 @@ output "resource_group_names" {
       sre        = module.rg_sre.name
       governance = module.rg_governance.name
     },
-    local.deploy_app_platform_targets ? { apps = module.rg_apps[0].name } : {}
+    local.deploy_app_platform_targets ? { apps = module.rg_apps[0].name } : {},
+    var.deploy_azure_sre_agent ? { azure_sre_agent = module.azure_sre_agent[0].resource_group_name } : {}
   )
 }
 
@@ -125,6 +126,36 @@ output "sre_remediation_action_group_id" {
   value       = var.deploy_sre_agent ? module.sre_agent[0].remediation_action_group_id : null
 }
 
+output "azure_sre_agent_id" {
+  description = "Portal-visible Azure SRE Agent resource ID."
+  value       = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].agent_id : null
+}
+
+output "azure_sre_agent_name" {
+  description = "Portal-visible Azure SRE Agent name."
+  value       = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].agent_name : null
+}
+
+output "azure_sre_agent_portal_url" {
+  description = "Direct Azure SRE Agent portal URL."
+  value       = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].agent_portal_url : null
+}
+
+output "azure_sre_agent_data_plane_url" {
+  description = "Azure SRE Agent data-plane URL."
+  value       = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].agent_data_plane_url : null
+}
+
+output "azure_sre_agent_resource_group_name" {
+  description = "Resource group containing the portal-visible Azure SRE Agent."
+  value       = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].resource_group_name : null
+}
+
+output "azure_sre_agent_managed_resource_group_ids" {
+  description = "Resource group IDs the portal-visible Azure SRE Agent can observe."
+  value       = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].managed_resource_group_ids : {}
+}
+
 output "backup_vault_name" {
   description = "Recovery Services Vault name."
   value       = var.deploy_backup ? module.backup[0].vault_name : null
@@ -165,6 +196,8 @@ output "sre_agent_summary" {
     log_analytics_workspace  = var.deploy_monitoring && var.deploy_log_analytics ? module.log_analytics[0].name : null
     automation_account_name  = var.deploy_sre_agent ? module.sre_agent[0].automation_account_name : null
     remediation_action_group = var.deploy_sre_agent ? module.sre_agent[0].remediation_action_group_id : null
+    azure_sre_agent_name     = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].agent_name : null
+    azure_sre_agent_url      = var.deploy_azure_sre_agent ? module.azure_sre_agent[0].agent_portal_url : null
   }
 }
 

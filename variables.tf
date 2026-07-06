@@ -279,6 +279,107 @@ variable "deploy_sre_agent" {
   default     = true
 }
 
+variable "deploy_azure_sre_agent" {
+  description = "Deploy a portal-visible Azure SRE Agent resource (Microsoft.App/agents). This is separate from the Automation/runbook SRE lab module."
+  type        = bool
+  default     = false
+}
+
+variable "azure_sre_agent_name" {
+  description = "Azure SRE Agent name. When null or empty, Terraform uses sreag-<environment>."
+  type        = string
+  default     = null
+
+  validation {
+    condition = (
+      var.azure_sre_agent_name == null ||
+      trimspace(var.azure_sre_agent_name) == "" ||
+      can(regex("^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$", trimspace(var.azure_sre_agent_name)))
+    )
+    error_message = "azure_sre_agent_name must be lowercase alphanumeric with optional hyphens, 2-63 characters."
+  }
+}
+
+variable "azure_sre_agent_location" {
+  description = "Azure region for the portal-visible Azure SRE Agent. This can differ from the lab workload region."
+  type        = string
+  default     = "eastus2"
+
+  validation {
+    condition = contains([
+      "swedencentral",
+      "uksouth",
+      "eastus2",
+      "australiaeast",
+      "francecentral",
+      "canadacentral",
+      "koreacentral",
+    ], lower(replace(var.azure_sre_agent_location, " ", "")))
+    error_message = "azure_sre_agent_location must be a currently supported Azure SRE Agent region."
+  }
+}
+
+variable "azure_sre_agent_access_level" {
+  description = "Azure SRE Agent access level. Low keeps investigation read-only; High allows privileged actions."
+  type        = string
+  default     = "Low"
+
+  validation {
+    condition     = contains(["High", "Low"], var.azure_sre_agent_access_level)
+    error_message = "azure_sre_agent_access_level must be High or Low."
+  }
+}
+
+variable "azure_sre_agent_action_mode" {
+  description = "Azure SRE Agent action mode. Review requires human approval; Automatic lets the agent act independently."
+  type        = string
+  default     = "Review"
+
+  validation {
+    condition     = contains(["Review", "Automatic"], var.azure_sre_agent_action_mode)
+    error_message = "azure_sre_agent_action_mode must be Review or Automatic."
+  }
+}
+
+variable "azure_sre_agent_model_provider" {
+  description = "Default model provider for Azure SRE Agent."
+  type        = string
+  default     = "MicrosoftFoundry"
+
+  validation {
+    condition     = contains(["MicrosoftFoundry", "Anthropic"], var.azure_sre_agent_model_provider)
+    error_message = "azure_sre_agent_model_provider must be MicrosoftFoundry or Anthropic."
+  }
+}
+
+variable "azure_sre_agent_model_name" {
+  description = "Default model name for Azure SRE Agent. Automatic lets the platform choose the default model for the provider."
+  type        = string
+  default     = "Automatic"
+}
+
+variable "azure_sre_agent_monthly_unit_limit" {
+  description = "Monthly active-flow Azure Agent Unit allocation limit for Azure SRE Agent."
+  type        = number
+  default     = 500
+
+  validation {
+    condition     = var.azure_sre_agent_monthly_unit_limit >= 500 && var.azure_sre_agent_monthly_unit_limit <= 1000000
+    error_message = "azure_sre_agent_monthly_unit_limit must be between 500 and 1000000."
+  }
+}
+
+variable "azure_sre_agent_monitor_lookback_days" {
+  description = "Azure Monitor connector alert lookback window in days for Azure SRE Agent."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.azure_sre_agent_monitor_lookback_days >= 1 && var.azure_sre_agent_monitor_lookback_days <= 30
+    error_message = "azure_sre_agent_monitor_lookback_days must be between 1 and 30."
+  }
+}
+
 variable "enable_alert_runbook_webhooks" {
   description = "Create Automation webhooks and a remediation action group so alerts can invoke safe lab runbooks. Disabled by default."
   type        = bool

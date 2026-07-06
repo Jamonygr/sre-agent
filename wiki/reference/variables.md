@@ -24,6 +24,7 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | `deploy_log_query_alerts` | `true` | Create KQL incident alerts |
 | `deploy_workbooks` | `true` | Create SRE workbook |
 | `deploy_sre_agent` | `true` | Create Automation Account and runbooks |
+| `deploy_azure_sre_agent` | `false` | Create a portal-visible Azure SRE Agent (`Microsoft.App/agents`) |
 | `enable_alert_runbook_webhooks` | `false` | Opt in to alert-triggered runbooks |
 | `deploy_update_management` | `true` | Create Update Manager maintenance config |
 | `deploy_backup` | `false` | Create Recovery Services Vault and protect VMs |
@@ -34,6 +35,18 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | `deploy_app_service` | `false` | Deploy Azure App Service |
 | `deploy_container_apps` | `false` | Deploy Azure Container Apps |
 | `deploy_functions` | `false` | Deploy Azure Functions |
+
+## Azure SRE Agent
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `azure_sre_agent_name` | `sreag-<environment>` | Portal-visible Azure SRE Agent name |
+| `azure_sre_agent_location` | `eastus2` | Azure SRE Agent region |
+| `azure_sre_agent_access_level` | `Low` | Read-only investigation by default |
+| `azure_sre_agent_action_mode` | `Review` | Require human review for actions |
+| `azure_sre_agent_model_provider` | `MicrosoftFoundry` | Default model provider |
+| `azure_sre_agent_model_name` | `Automatic` | Let the platform select the model |
+| `azure_sre_agent_monthly_unit_limit` | `500` | Lowest active-flow AAU allocation limit |
 
 ## VM And Access
 

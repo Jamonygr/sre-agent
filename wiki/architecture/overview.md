@@ -15,6 +15,7 @@ SRE Agent Azure Lab uses Terraform to create a small, repeatable Azure environme
 | `apps` | Optional AKS, App Service, Container Apps, and Functions targets |
 | `sre` | Log Analytics, Data Collection Rules, alerts, Workbooks, dashboard, SRE Automation Account, optional Backup |
 | `governance` | Optional Azure Policy assignments and supporting guardrails |
+| `sreagent` | Optional portal-visible Azure SRE Agent, managed identity, Application Insights, and agent telemetry workspace |
 
 ## Target Topology
 
@@ -35,6 +36,7 @@ The SRE resource group owns the operational layer:
 | Detection | VM CPU and availability metric alerts, KQL alerts for heartbeat, IIS outage, disk pressure, and critical Windows events |
 | Visibility | Workbooks and optional Azure Portal dashboard |
 | Remediation | Automation Account, managed identity, runbooks, optional alert webhooks |
+| Portal SRE Agent | Optional `Microsoft.App/agents` resource with Reader and Log Analytics Reader access to lab resource groups |
 | Governance | Update Manager, Policy, budget, optional VM backup |
 
 ## Design Defaults

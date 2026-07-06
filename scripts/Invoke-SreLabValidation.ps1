@@ -3,7 +3,10 @@ param(
     [string] $Environment = "lab",
     [string] $Project = "sreag",
     [string] $LocationShort = "wus2",
+    [string] $AzureSreAgentLocationShort = "eus2",
+    [string] $AzureSreAgentName = "",
     [switch] $ValidateAppPlatform,
+    [switch] $ValidateAzureSreAgent,
     [switch] $SkipAzLoginCheck
 )
 
@@ -43,6 +46,23 @@ function Get-ResourceCount {
     return @($ids | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
 }
 
+function Test-AzResourceExists {
+    param(
+        [string] $ResourceGroupName,
+        [string] $ResourceType,
+        [string] $Name
+    )
+
+    $id = az resource show `
+        --resource-group $ResourceGroupName `
+        --resource-type $ResourceType `
+        --name $Name `
+        --query "id" `
+        -o tsv 2>$null
+
+    return -not [string]::IsNullOrWhiteSpace($id)
+}
+
 if (-not $SkipAzLoginCheck) {
     $account = az account show --query "id" -o tsv 2>$null
     if (-not $account) {
@@ -52,6 +72,8 @@ if (-not $SkipAzLoginCheck) {
 
 $script:FailedChecks = 0
 $baseName = "{0}-{1}-{2}" -f $Project, $Environment, $LocationShort
+$azureSreAgentNameEffective = if ([string]::IsNullOrWhiteSpace($AzureSreAgentName)) { "sreag-$Environment" } else { $AzureSreAgentName }
+$azureSreAgentResourceGroup = "rg-sreagent-$Project-$Environment-$AzureSreAgentLocationShort"
 $resourceGroups = @{
     Network    = "rg-network-$baseName"
     Windows    = "rg-windows-$baseName"
@@ -86,6 +108,18 @@ Write-Check -Name "Data Collection Rule exists" -Passed ((Get-ResourceCount -Res
 Write-Check -Name "Action Group exists" -Passed ((Get-ResourceCount -ResourceGroupName $resourceGroups.Sre -ResourceType "Microsoft.Insights/actionGroups") -gt 0) -Detail $resourceGroups.Sre
 Write-Check -Name "Scheduled query alerts exist" -Passed ((Get-ResourceCount -ResourceGroupName $resourceGroups.Sre -ResourceType "Microsoft.Insights/scheduledQueryRules") -gt 0) -Detail $resourceGroups.Sre
 Write-Check -Name "SRE Automation Account exists" -Passed ((Get-ResourceCount -ResourceGroupName $resourceGroups.Sre -ResourceType "Microsoft.Automation/automationAccounts") -gt 0) -Detail $resourceGroups.Sre
+
+if ($ValidateAzureSreAgent) {
+    $azureSreAgentResourceGroupExists = az group exists --name $azureSreAgentResourceGroup | ConvertFrom-Json
+    Write-Check -Name "Azure SRE Agent resource group exists" -Passed $azureSreAgentResourceGroupExists -Detail $azureSreAgentResourceGroup
+
+    if ($azureSreAgentResourceGroupExists) {
+        Write-Check -Name "Azure SRE Agent exists" -Passed (Test-AzResourceExists -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.App/agents" -Name $azureSreAgentNameEffective) -Detail $azureSreAgentNameEffective
+        Write-Check -Name "Azure SRE Agent identity exists" -Passed ((Get-ResourceCount -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.ManagedIdentity/userAssignedIdentities") -gt 0) -Detail $azureSreAgentResourceGroup
+        Write-Check -Name "Azure SRE Agent Application Insights exists" -Passed ((Get-ResourceCount -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.Insights/components") -gt 0) -Detail $azureSreAgentResourceGroup
+        Write-Check -Name "Azure SRE Agent telemetry workspace exists" -Passed ((Get-ResourceCount -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.OperationalInsights/workspaces") -gt 0) -Detail $azureSreAgentResourceGroup
+    }
+}
 
 $automationAccount = az automation account list `
     --resource-group $resourceGroups.Sre `

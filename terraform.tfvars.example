@@ -32,6 +32,7 @@ deploy_service_health_alerts = true
 deploy_resource_health_alerts = true
 deploy_advisor_recommendation_alerts = true
 deploy_sre_agent             = true
+deploy_azure_sre_agent       = false
 enable_alert_runbook_webhooks = false
 enable_scheduled_startstop   = true
 deploy_backup                = false

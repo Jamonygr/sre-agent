@@ -6,7 +6,8 @@ locals {
   environment = lower(var.environment)
   project     = lower(var.project)
 
-  normalized_location = lower(replace(var.location, " ", ""))
+  normalized_location      = lower(replace(var.location, " ", ""))
+  azure_sre_agent_location = lower(replace(var.azure_sre_agent_location, " ", ""))
 
   location_short_map = {
     westeurope         = "weu"
@@ -23,6 +24,11 @@ locals {
   }
 
   location_short = lookup(local.location_short_map, local.normalized_location, substr(local.normalized_location, 0, 4))
+  azure_sre_agent_location_short = lookup(
+    local.location_short_map,
+    local.azure_sre_agent_location,
+    substr(local.azure_sre_agent_location, 0, 4)
+  )
 
   common_tags = merge(
     {
@@ -42,6 +48,11 @@ locals {
   effective_admin_password  = try(trimspace(var.admin_password), "") == "" ? random_password.admin_password.result : var.admin_password
 
   base_name = "${local.project}-${local.environment}-${local.location_short}"
+  azure_sre_agent_name = (
+    try(trimspace(var.azure_sre_agent_name), "") == ""
+    ? "sreag-${local.environment}"
+    : lower(trimspace(var.azure_sre_agent_name))
+  )
 
   vm_name_environment = substr(replace(local.environment, "-", ""), 0, 4)
   vm_name_suffix      = "${local.vm_name_environment}${local.location_short}"
@@ -54,6 +65,15 @@ locals {
   app_dns_prefix              = substr("aks${local.app_name_safe_base}", 0, 54)
   function_storage_name       = substr("stfn${local.app_name_safe_base}${local.app_global_suffix}", 0, 24)
   log_analytics_workspace_id  = var.deploy_monitoring && var.deploy_log_analytics ? module.log_analytics[0].id : null
+  azure_sre_agent_managed_resource_group_ids = merge(
+    {
+      network    = module.rg_network.id
+      windows    = module.rg_windows.id
+      sre        = module.rg_sre.id
+      governance = module.rg_governance.id
+    },
+    local.deploy_app_platform_targets ? { apps = local.app_resource_group_id } : {}
+  )
 
   monitored_vm_ids_by_key = merge(
     var.deploy_windows_targets && var.deploy_jumpbox ? { jumpbox = module.jumpbox[0].vm_id } : {},

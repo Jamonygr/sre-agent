@@ -13,7 +13,7 @@
 
 SRE Agent Azure Lab is a Terraform-first Azure sandbox for practicing native incident detection and guided remediation. It provisions Windows VM incident targets plus optional modern app-platform targets: Azure Kubernetes Service, Azure App Service, Azure Container Apps, and Azure Functions.
 
-It uses Azure Monitor Agent, Data Collection Rules, Log Analytics, KQL alerts, Workbooks, Azure Automation runbooks, Update Manager, Policy, Resource Health alerts, and cost controls.
+It uses Azure Monitor Agent, Data Collection Rules, Log Analytics, KQL alerts, Workbooks, Azure Automation runbooks, Update Manager, Policy, Resource Health alerts, cost controls, and an optional portal-visible Azure SRE Agent (`Microsoft.App/agents`).
 
 The lab is intentionally Azure-native: Terraform provisions the platform, Azure Monitor detects signals, and Automation runbooks perform safe lab remediation. No third-party monitoring stack is required in v1.
 
@@ -21,10 +21,10 @@ The lab is intentionally Azure-native: Terraform provisions the platform, Azure 
 
 | Step | Command or file | What it proves |
 | --- | --- | --- |
-| Lowest-cost profile | `environments/cheap-lab.tfvars` | One jumpbox, one IIS target, native monitoring, SRE runbooks, no premium network services |
+| Lowest-cost profile | `environments/cheap-lab.tfvars` | One jumpbox, one IIS target, native monitoring, SRE runbooks, optional portal Azure SRE Agent, no premium network services |
 | Quality gate | `.\scripts\Invoke-QualityGate.ps1` | Formatting, validation, script parsing, compile checks, reserved wording, and no-refresh plans |
 | No-apply plan | `.\scripts\Invoke-LocalPlan.ps1 -VarFile environments/lab.tfvars` | Azure graph can be planned before creating resources |
-| Script validation | `.\scripts\Invoke-SreLabValidation.ps1` | Resource groups, telemetry, alerts, AMA, and runbooks exist after deployment |
+| Script validation | `.\scripts\Invoke-SreLabValidation.ps1` | Resource groups, telemetry, alerts, AMA, runbooks, and optionally the portal Azure SRE Agent exist after deployment |
 | Incident exercises | `.\scripts\Invoke-SreIncident.ps1 -Scenario IisOutage` | Lab can generate signals for alert and remediation practice |
 | Readiness review | [Operational readiness](docs/operational-readiness.md) | Security, reliability, cost, governance, and operations review points |
 
@@ -43,6 +43,7 @@ The deployment creates five main resource-group roles:
 | `apps` | Optional AKS, App Service, Container Apps, and Functions targets |
 | `sre` | Log Analytics, DCRs, alerts, Workbooks, dashboard, Automation runbooks, optional Backup |
 | `governance` | Optional Azure Policy assignments and guardrail resources |
+| `sreagent` | Optional portal-visible Azure SRE Agent, managed identity, and agent telemetry |
 
 ## Native SRE Flow
 
@@ -56,6 +57,7 @@ The deployment creates five main resource-group roles:
 4. Action Groups notify operators.
 5. Azure Automation runbooks can restart IIS, start stopped VMs, collect diagnostics, or clean lab-safe temporary files.
 6. Direct alert-to-runbook webhooks stay off by default and require `enable_alert_runbook_webhooks = true`.
+7. When `deploy_azure_sre_agent = true`, a real Azure SRE Agent can observe the lab resource groups from `sre.azure.com`.
 
 ## Deployment Profiles
 
@@ -104,6 +106,7 @@ deploy_alerts                 = true
 deploy_log_query_alerts       = true
 deploy_workbooks              = true
 deploy_sre_agent              = true
+deploy_azure_sre_agent        = false
 enable_alert_runbook_webhooks = false
 deploy_update_management      = true
 deploy_backup                 = false
@@ -155,6 +158,7 @@ Terratest smoke tests live in `tests/` and skip live Azure checks when `ARM_SUBS
 ## Cost And Safety Notes
 
 - Keep `enable_alert_runbook_webhooks = false` until you intentionally want alerts to invoke runbooks.
+- Keep `deploy_azure_sre_agent = false` unless you want a real Azure SRE Agent; it starts Azure SRE Agent billing when created.
 - Keep `allowed_rdp_source_ips = []` unless you have a trusted CIDR.
 - Use `cheap-lab` first; `lab` enables modern app-platform services, and `full` adds more VMs and Backup.
 - AKS nodes, App Service plans, Firewall, VPN Gateway, Backup storage, and Managed Grafana can materially increase cost.

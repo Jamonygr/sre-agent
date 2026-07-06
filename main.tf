@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -40,6 +44,8 @@ provider "azurerm" {
     }
   }
 }
+
+provider "azapi" {}
 
 data "azurerm_client_config" "current" {}
 
@@ -625,6 +631,26 @@ module "sre_agent" {
   enable_scheduled_startstop = var.enable_scheduled_startstop
   webhook_expiry_time        = var.alert_runbook_webhook_expiry_time
   tags                       = local.common_tags
+}
+
+module "azure_sre_agent" {
+  source = "./modules/azure-sre-agent"
+  count  = var.deploy_azure_sre_agent ? 1 : 0
+
+  name                           = local.azure_sre_agent_name
+  resource_group_name            = "rg-sreagent-${local.project}-${local.environment}-${local.azure_sre_agent_location_short}"
+  location                       = local.azure_sre_agent_location
+  managed_resource_group_ids     = local.azure_sre_agent_managed_resource_group_ids
+  log_analytics_workspace_id     = local.log_analytics_workspace_id
+  access_level                   = var.azure_sre_agent_access_level
+  action_mode                    = var.azure_sre_agent_action_mode
+  default_model_provider         = var.azure_sre_agent_model_provider
+  default_model_name             = var.azure_sre_agent_model_name
+  monthly_agent_unit_limit       = var.azure_sre_agent_monthly_unit_limit
+  azure_monitor_lookback_days    = var.azure_sre_agent_monitor_lookback_days
+  enable_azure_monitor_connector = true
+  enable_log_analytics_connector = var.deploy_monitoring && var.deploy_log_analytics
+  tags                           = local.common_tags
 }
 
 module "backup" {

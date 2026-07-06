@@ -20,6 +20,12 @@
 | `function_app_default_hostname` | Function App default hostname when deployed |
 | `automation_account_name` | SRE Automation Account name |
 | `sre_agent_runbook_names` | Runbooks created by the SRE agent module |
+| `azure_sre_agent_id` | Portal-visible Azure SRE Agent resource ID |
+| `azure_sre_agent_name` | Portal-visible Azure SRE Agent name |
+| `azure_sre_agent_portal_url` | Direct Azure SRE Agent portal URL |
+| `azure_sre_agent_data_plane_url` | Azure SRE Agent data-plane URL |
+| `azure_sre_agent_resource_group_name` | Resource group containing the Azure SRE Agent |
+| `azure_sre_agent_managed_resource_group_ids` | Resource groups the Azure SRE Agent can observe |
 | `backup_vault_name` | Recovery Services Vault name when backup is enabled |
 | `iis_public_endpoint` | First IIS HTTP endpoint when public IPs are enabled |
 | `iis_private_ips` | IIS private IPs keyed by target |
