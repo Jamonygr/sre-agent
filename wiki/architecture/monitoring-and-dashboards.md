@@ -16,6 +16,12 @@ The lab uses Azure Monitor Agent and Data Collection Rules for Windows telemetry
 | Heartbeat | Log Analytics `Heartbeat` table | Missing heartbeat detection |
 | Change tracking streams | Log Analytics | Optional configuration-change visibility |
 
+## Azure SRE Agent Log Context
+
+When `deploy_azure_sre_agent = true`, the portal-visible agent can use built-in Azure tools to query Azure Monitor and Log Analytics through managed identity and RBAC. The lab also enables `enable_azure_sre_agent_log_analytics_connector = true` by default so the agent has persistent context for the lab workspace.
+
+Keep `enable_azure_sre_agent_azure_monitor_connector = false` unless you are testing that preview connector directly. A failed `azure-monitor` connector can make the Operations Hub Logs tile red even while the `log-analytics` connector is healthy.
+
 ## Alert Rules
 
 | Alert | Type | Signal |

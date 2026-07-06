@@ -17,6 +17,8 @@ It uses Azure Monitor Agent, Data Collection Rules, Log Analytics, KQL alerts, W
 
 The lab is intentionally Azure-native: Terraform provisions the platform, Azure Monitor detects signals, and Automation runbooks perform safe lab remediation. No third-party monitoring stack is required in v1.
 
+Latest Azure SRE Agent documentation check: 2026-07-06. Azure SRE Agent can query Azure Monitor, Log Analytics, Application Insights, Azure Resource Graph, and Azure Resource Manager through managed identity and Azure RBAC. The lab keeps Azure DevOps repository/wiki access optional and configures it after deployment in the Azure SRE Agent portal instead of storing PATs in Terraform.
+
 ## Quality Review Path
 
 | Step | Command or file | What it proves |
@@ -58,17 +60,19 @@ The deployment creates five main resource-group roles:
 5. Azure Automation runbooks can restart IIS, start stopped VMs, collect diagnostics, or clean lab-safe temporary files.
 6. Direct alert-to-runbook webhooks stay off by default and require `enable_alert_runbook_webhooks = true`.
 7. When `deploy_azure_sre_agent = true`, a real Azure SRE Agent can observe the lab resource groups from `sre.azure.com`.
+8. Azure DevOps Code Access and wiki/documentation indexing are optional portal connections; normal Terraform plans and validation do not require them.
 
 ## Deployment Profiles
 
 | Profile | File | Best for | Cost posture |
 | --- | --- | --- | --- |
 | `cheap-lab` | `environments/cheap-lab.tfvars` | First review and low-cost demos | Lowest |
+| `ado-lab` | `environments/ado-lab.tfvars` | Low-cost Azure SRE Agent lab connected to Azure DevOps repo context | Low |
 | `dev` | `environments/dev.tfvars` | Terraform and module testing | Very low |
 | `lab` | `environments/lab.tfvars` | Normal SRE incident lab with AKS, App Service, Container Apps, and Functions | Moderate |
 | `full` | `environments/full.tfvars` | Expanded demo with app platform, backup, and extra targets | Highest |
 
-Start with `cheap-lab` unless you specifically need AKS, App Service, Container Apps, Functions, backup, Firewall, VPN, or extra Windows targets.
+Start with `cheap-lab` unless you specifically need AKS, App Service, Container Apps, Functions, backup, Firewall, VPN, extra Windows targets, or the Azure DevOps-focused `ado-lab` profile.
 
 ## Quick Start
 
@@ -107,6 +111,8 @@ deploy_log_query_alerts       = true
 deploy_workbooks              = true
 deploy_sre_agent              = true
 deploy_azure_sre_agent        = false
+enable_azure_sre_agent_log_analytics_connector = true
+enable_azure_sre_agent_azure_monitor_connector = false
 enable_alert_runbook_webhooks = false
 deploy_update_management      = true
 deploy_backup                 = false
@@ -155,12 +161,25 @@ Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
 
 Terratest smoke tests live in `tests/` and skip live Azure checks when `ARM_SUBSCRIPTION_ID` is not set.
 
+Azure DevOps validation is optional. After connecting a repository in the Azure SRE Agent portal, validate that repo connector with:
+
+```powershell
+.\scripts\Invoke-SreLabValidation.ps1 `
+  -Environment cheap-lab `
+  -ValidateAzureSreAgent `
+  -ValidateAzureDevOpsRepo `
+  -AzureDevOpsRepoName Azureboards `
+  -AzureDevOpsRepoUrl "https://dev.azure.com/Beyondcloudwithchriz/Azureboards/_git/Azureboards"
+```
+
 ## Cost And Safety Notes
 
 - Keep `enable_alert_runbook_webhooks = false` until you intentionally want alerts to invoke runbooks.
 - Keep `deploy_azure_sre_agent = false` unless you want a real Azure SRE Agent; it starts Azure SRE Agent billing when created.
+- Keep `enable_azure_sre_agent_azure_monitor_connector = false` unless you are testing that preview connector. Log Analytics remains the default connector for lab workspace context.
+- Keep Azure DevOps PATs out of Terraform. Connect Azure DevOps manually in the Azure SRE Agent portal and validate it only when the demo needs repo or wiki context.
 - Keep `allowed_rdp_source_ips = []` unless you have a trusted CIDR.
-- Use `cheap-lab` first; `lab` enables modern app-platform services, and `full` adds more VMs and Backup.
+- Use `cheap-lab` first, or `ado-lab` when Azure DevOps repo context is part of the demo; `lab` enables modern app-platform services, and `full` adds more VMs and Backup.
 - AKS nodes, App Service plans, Firewall, VPN Gateway, Backup storage, and Managed Grafana can materially increase cost.
 - Destroy temporary deployments when finished.
 
@@ -171,6 +190,7 @@ Terratest smoke tests live in `tests/` and skip live Azure checks when `ARM_SUBS
 - [Monitoring and dashboards](wiki/architecture/monitoring-and-dashboards.md)
 - [Update management](wiki/architecture/update-management.md)
 - [Operational readiness](docs/operational-readiness.md)
+- [Azure SRE Agent integration](wiki/reference/azure-sre-agent.md)
 - [Variables reference](wiki/reference/variables.md)
 - [Outputs reference](wiki/reference/outputs.md)
 - [Pipeline](wiki/reference/pipeline.md)

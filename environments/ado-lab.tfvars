@@ -1,11 +1,18 @@
 # =============================================================================
-# CHEAP LAB ENVIRONMENT - COST-SAFE REVIEW PROFILE
+# ADO LAB ENVIRONMENT - LOW-COST AZURE DEVOPS SRE AGENT PROFILE
 # =============================================================================
 
-environment = "cheap-lab"
-project     = "sreag"
-location    = "westus2"
-owner       = "Lab-User"
+environment    = "ado-lab"
+project        = "sreag"
+location       = "westus2"
+owner          = "Lab-User"
+repository_url = "https://dev.azure.com/Beyondcloudwithchriz/Azureboards/_git/Azureboards"
+
+extra_tags = {
+  DevOpsOrg     = "Beyondcloudwithchriz"
+  DevOpsProject = "Azureboards"
+  DevOpsRepo    = "Azureboards"
+}
 
 deploy_monitoring                              = true
 deploy_log_analytics                           = true

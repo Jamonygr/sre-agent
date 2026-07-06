@@ -1,13 +1,18 @@
 package test
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gruntwork-io/terratest/modules/azure"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testEnv struct {
@@ -15,7 +20,10 @@ type testEnv struct {
 	locationShort                 string
 	azureSreAgentLocationShort    string
 	azureSreAgentName             string
+	azureDevOpsRepoName           string
+	azureDevOpsRepoURL            string
 	validatePortalVisibleSreAgent bool
+	validateAzureDevOpsRepo       bool
 }
 
 func currentTestEnv() testEnv {
@@ -39,12 +47,25 @@ func currentTestEnv() testEnv {
 		azureSreAgentName = "sreag-" + env
 	}
 
+	azureDevOpsRepoName := os.Getenv("TEST_AZURE_DEVOPS_REPO_NAME")
+	if azureDevOpsRepoName == "" && env == "ado-lab" {
+		azureDevOpsRepoName = "Azureboards"
+	}
+
+	azureDevOpsRepoURL := os.Getenv("TEST_AZURE_DEVOPS_REPO_URL")
+	if azureDevOpsRepoURL == "" && env == "ado-lab" {
+		azureDevOpsRepoURL = "https://dev.azure.com/Beyondcloudwithchriz/Azureboards/_git/Azureboards"
+	}
+
 	return testEnv{
 		environment:                   env,
 		locationShort:                 locationShort,
 		azureSreAgentLocationShort:    azureSreAgentLocationShort,
 		azureSreAgentName:             azureSreAgentName,
+		azureDevOpsRepoName:           azureDevOpsRepoName,
+		azureDevOpsRepoURL:            azureDevOpsRepoURL,
 		validatePortalVisibleSreAgent: os.Getenv("TEST_VALIDATE_AZURE_SRE_AGENT") == "true",
+		validateAzureDevOpsRepo:       os.Getenv("TEST_VALIDATE_AZURE_DEVOPS_REPO") == "true",
 	}
 }
 
@@ -106,6 +127,55 @@ func azResourceExists(t *testing.T, resourceGroupName string, resourceType strin
 	}
 
 	return strings.TrimSpace(string(output)) != ""
+}
+
+func azResourceValue(t *testing.T, args ...string) string {
+	t.Helper()
+
+	output, err := exec.Command("az", args...).CombinedOutput()
+	require.NoError(t, err, "az command failed: %s", string(output))
+
+	return strings.TrimSpace(string(output))
+}
+
+func azureSreAgentRepos(t *testing.T, env testEnv) string {
+	t.Helper()
+
+	endpoint := azResourceValue(
+		t,
+		"resource", "show",
+		"--resource-group", env.azureSreAgentResourceGroup(),
+		"--resource-type", "Microsoft.App/agents",
+		"--name", env.azureSreAgentName,
+		"--api-version", "2025-05-01-preview",
+		"--query", "properties.agentEndpoint",
+		"-o", "tsv",
+	)
+	require.NotEmpty(t, endpoint)
+
+	token := azResourceValue(
+		t,
+		"account", "get-access-token",
+		"--resource", "https://azuresre.dev",
+		"--query", "accessToken",
+		"-o", "tsv",
+	)
+	require.NotEmpty(t, token)
+
+	client := http.Client{Timeout: 30 * time.Second}
+	request, err := http.NewRequest(http.MethodGet, strings.TrimRight(endpoint, "/")+"/api/v2/repos", nil)
+	require.NoError(t, err)
+	request.Header.Set("Authorization", "Bearer "+token)
+
+	response, err := client.Do(request)
+	require.NoError(t, err)
+	defer response.Body.Close()
+
+	output, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, response.StatusCode, string(output))
+
+	return string(output)
 }
 
 func TestCoreResourceGroups(t *testing.T) {
@@ -185,4 +255,28 @@ func TestAzureSreAgentExists(t *testing.T) {
 	assert.Greater(t, azResourceCount(t, rg, "Microsoft.ManagedIdentity/userAssignedIdentities"), 0)
 	assert.Greater(t, azResourceCount(t, rg, "Microsoft.Insights/components"), 0)
 	assert.Greater(t, azResourceCount(t, rg, "Microsoft.OperationalInsights/workspaces"), 0)
+}
+
+func TestAzureSreAgentAzureDevOpsRepoConnected(t *testing.T) {
+	t.Parallel()
+
+	if os.Getenv("ARM_SUBSCRIPTION_ID") == "" {
+		t.Skip("ARM_SUBSCRIPTION_ID not set")
+	}
+
+	env := currentTestEnv()
+	if !env.validatePortalVisibleSreAgent {
+		t.Skip("TEST_VALIDATE_AZURE_SRE_AGENT is not true")
+	}
+	if !env.validateAzureDevOpsRepo {
+		t.Skip("TEST_VALIDATE_AZURE_DEVOPS_REPO is not true")
+	}
+	require.NotEmpty(t, env.azureDevOpsRepoName, "set TEST_AZURE_DEVOPS_REPO_NAME when validating Azure DevOps outside ado-lab")
+	require.NotEmpty(t, env.azureDevOpsRepoURL, "set TEST_AZURE_DEVOPS_REPO_URL when validating Azure DevOps outside ado-lab")
+
+	var repos any
+	rawRepos := azureSreAgentRepos(t, env)
+	assert.NoError(t, json.Unmarshal([]byte(rawRepos), &repos), rawRepos)
+	assert.Contains(t, rawRepos, env.azureDevOpsRepoName)
+	assert.Contains(t, rawRepos, env.azureDevOpsRepoURL)
 }

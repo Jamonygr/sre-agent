@@ -89,9 +89,9 @@ variable "azure_monitor_lookback_days" {
 }
 
 variable "enable_azure_monitor_connector" {
-  description = "Enable the Azure Monitor connector."
+  description = "Enable the preview Azure Monitor connector. The agent can query Azure Monitor through built-in Azure tools without this connector."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_log_analytics_connector" {

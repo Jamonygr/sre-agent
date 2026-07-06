@@ -42,6 +42,16 @@ variable "extra_tags" {
   description = "Extra tags to merge into every resource."
   type        = map(string)
   default     = {}
+
+  validation {
+    condition = alltrue([
+      for key, value in var.extra_tags :
+      !startswith(lower(key), "microsoft") &&
+      !startswith(lower(key), "azure") &&
+      !startswith(lower(key), "windows")
+    ])
+    error_message = "extra_tags keys must not start with reserved Azure tag prefixes: microsoft, azure, or windows."
+  }
 }
 
 variable "admin_username" {
@@ -378,6 +388,18 @@ variable "azure_sre_agent_monitor_lookback_days" {
     condition     = var.azure_sre_agent_monitor_lookback_days >= 1 && var.azure_sre_agent_monitor_lookback_days <= 30
     error_message = "azure_sre_agent_monitor_lookback_days must be between 1 and 30."
   }
+}
+
+variable "enable_azure_sre_agent_azure_monitor_connector" {
+  description = "Create the preview Azure Monitor connector subresource for Azure SRE Agent. Keep false unless testing the connector explicitly; the agent can query Azure Monitor through built-in Azure tools."
+  type        = bool
+  default     = false
+}
+
+variable "enable_azure_sre_agent_log_analytics_connector" {
+  description = "Create a Log Analytics connector for Azure SRE Agent when the lab workspace exists, giving the agent persistent workspace context in addition to built-in Azure log querying."
+  type        = bool
+  default     = true
 }
 
 variable "enable_alert_runbook_webhooks" {

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string[]] $PlanProfiles = @("cheap-lab", "lab"),
+    [string[]] $PlanProfiles = @("cheap-lab", "ado-lab", "lab"),
     [switch] $SkipPlans,
     [switch] $SkipGoCompile
 )
@@ -65,6 +65,14 @@ try {
                 Pop-Location
             }
         }
+    }
+
+    Invoke-Step -Name "TFLint" -ScriptBlock {
+        tflint --init
+        tflint --recursive `
+            --disable-rule=terraform_required_version `
+            --disable-rule=terraform_required_providers `
+            --disable-rule=terraform_unused_declarations
     }
 
     if (-not $SkipPlans) {
