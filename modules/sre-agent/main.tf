@@ -34,7 +34,7 @@ resource "azurerm_automation_runbook" "restart_iis" {
   automation_account_name = azurerm_automation_account.this.name
   log_verbose             = true
   log_progress            = true
-  runbook_type            = "PowerShell72"
+  runbook_type            = "PowerShell"
   description             = "Restarts IIS on matching lab VMs as an incident remediation exercise."
   tags                    = var.tags
 
@@ -69,7 +69,7 @@ resource "azurerm_automation_runbook" "start_stopped_lab_vms" {
   automation_account_name = azurerm_automation_account.this.name
   log_verbose             = true
   log_progress            = true
-  runbook_type            = "PowerShell72"
+  runbook_type            = "PowerShell"
   description             = "Starts stopped or deallocated lab VMs during a VM availability incident."
   tags                    = var.tags
 
@@ -100,7 +100,7 @@ resource "azurerm_automation_runbook" "collect_vm_diagnostics" {
   automation_account_name = azurerm_automation_account.this.name
   log_verbose             = true
   log_progress            = true
-  runbook_type            = "PowerShell72"
+  runbook_type            = "PowerShell"
   description             = "Collects a lightweight diagnostics snapshot from lab VMs through Run Command."
   tags                    = var.tags
 
@@ -135,7 +135,7 @@ resource "azurerm_automation_runbook" "cleanup_disk" {
   automation_account_name = azurerm_automation_account.this.name
   log_verbose             = true
   log_progress            = true
-  runbook_type            = "PowerShell72"
+  runbook_type            = "PowerShell"
   description             = "Performs lab-safe temporary file cleanup on Windows targets during disk pressure scenarios."
   tags                    = var.tags
 
@@ -173,7 +173,7 @@ resource "azurerm_automation_runbook" "stop_lab_vms" {
   automation_account_name = azurerm_automation_account.this.name
   log_verbose             = true
   log_progress            = true
-  runbook_type            = "PowerShell72"
+  runbook_type            = "PowerShell"
   description             = "Stops all VMs in the Windows lab resource group for scheduled cost control."
   tags                    = var.tags
 
