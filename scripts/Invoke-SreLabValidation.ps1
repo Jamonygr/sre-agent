@@ -34,16 +34,13 @@ function Get-ResourceCount {
         [string] $ResourceType
     )
 
-    $count = az resource list `
+    $ids = az resource list `
         --resource-group $ResourceGroupName `
         --resource-type $ResourceType `
-        --query "length(@)" `
+        --query "[].id" `
         -o tsv
 
-    if ([string]::IsNullOrWhiteSpace($count)) {
-        return 0
-    }
-    return [int] $count
+    return @($ids | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
 }
 
 if (-not $SkipAzLoginCheck) {

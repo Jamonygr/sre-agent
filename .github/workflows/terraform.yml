@@ -210,7 +210,7 @@ jobs:
           sudo mv conftest /usr/local/bin/conftest
 
       - name: Run policies
-        run: conftest test tfplan.json --policy policies
+        run: conftest test tfplan.json --policy policies --all-namespaces
 
   apply:
     name: Apply

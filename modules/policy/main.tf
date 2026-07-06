@@ -22,11 +22,11 @@ resource "azurerm_policy_definition" "require_tag" {
   })
 
   policy_rule = jsonencode({
-    if = {
+    "if" = {
       field  = "[concat('tags[', parameters('tagName'), ']')]"
       exists = "false"
     }
-    then = {
+    "then" = {
       effect = "audit"
     }
   })
@@ -54,7 +54,7 @@ resource "azurerm_policy_definition" "allowed_locations" {
   })
 
   policy_rule = jsonencode({
-    if = {
+    "if" = {
       allOf = [
         {
           field  = "location"
@@ -66,21 +66,29 @@ resource "azurerm_policy_definition" "allowed_locations" {
         }
       ]
     }
-    then = {
+    "then" = {
       effect = "audit"
     }
   })
 }
 
 locals {
-  required_tag_assignments = merge([
-    for rg_key, rg_id in var.resource_group_ids : {
-      for tag_name in var.required_tags : "${rg_key}-${tag_name}" => {
+  required_tag_assignment_pairs = flatten([
+    for rg_key, rg_id in var.resource_group_ids : [
+      for tag_name in var.required_tags : {
+        key               = "${rg_key}-${tag_name}"
         resource_group_id = rg_id
         tag_name          = tag_name
       }
+    ]
+  ])
+
+  required_tag_assignments = {
+    for assignment in local.required_tag_assignment_pairs : assignment.key => {
+      resource_group_id = assignment.resource_group_id
+      tag_name          = assignment.tag_name
     }
-  ]...)
+  }
 }
 
 resource "azurerm_resource_group_policy_assignment" "require_tag" {

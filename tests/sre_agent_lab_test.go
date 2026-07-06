@@ -3,7 +3,6 @@ package test
 import (
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -51,13 +50,17 @@ func azResourceCount(t *testing.T, resourceGroupName string, resourceType string
 		"list",
 		"--resource-group", resourceGroupName,
 		"--resource-type", resourceType,
-		"--query", "length(@)",
+		"--query", "[].id",
 		"-o", "tsv",
 	).CombinedOutput()
 	assert.NoError(t, err, "az resource list failed: %s", string(output))
 
-	count, parseErr := strconv.Atoi(strings.TrimSpace(string(output)))
-	assert.NoError(t, parseErr, "az resource list returned a non-numeric count: %s", string(output))
+	count := 0
+	for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+		if strings.TrimSpace(line) != "" {
+			count++
+		}
+	}
 	return count
 }
 
