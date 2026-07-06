@@ -5,8 +5,11 @@ param(
     [string] $LocationShort = "wus2",
     [string] $AzureSreAgentLocationShort = "eus2",
     [string] $AzureSreAgentName = "",
+    [string] $AzureDevOpsRepoName = "",
+    [string] $AzureDevOpsRepoUrl = "",
     [switch] $ValidateAppPlatform,
     [switch] $ValidateAzureSreAgent,
+    [switch] $ValidateAzureDevOpsRepo,
     [switch] $SkipAzLoginCheck
 )
 
@@ -63,6 +66,57 @@ function Test-AzResourceExists {
     return -not [string]::IsNullOrWhiteSpace($id)
 }
 
+function Get-AzureSreAgentEndpoint {
+    param(
+        [string] $ResourceGroupName,
+        [string] $AgentName
+    )
+
+    return az resource show `
+        --resource-group $ResourceGroupName `
+        --resource-type "Microsoft.App/agents" `
+        --name $AgentName `
+        --api-version "2025-05-01-preview" `
+        --query "properties.agentEndpoint" `
+        -o tsv 2>$null
+}
+
+function Test-AzureSreAgentRepoConnection {
+    param(
+        [string] $Endpoint,
+        [string] $RepoName,
+        [string] $RepoUrl
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Endpoint)) {
+        return $false
+    }
+
+    $token = az account get-access-token --resource "https://azuresre.dev" --query "accessToken" -o tsv 2>$null
+    if ([string]::IsNullOrWhiteSpace($token)) {
+        return $false
+    }
+
+    try {
+        $reposUri = "{0}/api/v2/repos" -f $Endpoint.TrimEnd("/")
+        $repos = Invoke-RestMethod `
+            -Method Get `
+            -Uri $reposUri `
+            -Headers @{ Authorization = "Bearer $token" } `
+            -TimeoutSec 30
+
+        $repoJson = $repos | ConvertTo-Json -Depth 20
+        return (
+            $repoJson -match [regex]::Escape($RepoName) -and
+            $repoJson -match [regex]::Escape($RepoUrl)
+        )
+    }
+    catch {
+        Write-Verbose $_.Exception.Message
+        return $false
+    }
+}
+
 if (-not $SkipAzLoginCheck) {
     $account = az account show --query "id" -o tsv 2>$null
     if (-not $account) {
@@ -73,6 +127,24 @@ if (-not $SkipAzLoginCheck) {
 $script:FailedChecks = 0
 $baseName = "{0}-{1}-{2}" -f $Project, $Environment, $LocationShort
 $azureSreAgentNameEffective = if ([string]::IsNullOrWhiteSpace($AzureSreAgentName)) { "sreag-$Environment" } else { $AzureSreAgentName }
+$azureDevOpsRepoNameEffective = if (-not [string]::IsNullOrWhiteSpace($AzureDevOpsRepoName)) {
+    $AzureDevOpsRepoName
+}
+elseif ($Environment -eq "ado-lab") {
+    "Azureboards"
+}
+else {
+    ""
+}
+$azureDevOpsRepoUrlEffective = if (-not [string]::IsNullOrWhiteSpace($AzureDevOpsRepoUrl)) {
+    $AzureDevOpsRepoUrl
+}
+elseif ($Environment -eq "ado-lab") {
+    "https://dev.azure.com/Beyondcloudwithchriz/Azureboards/_git/Azureboards"
+}
+else {
+    ""
+}
 $azureSreAgentResourceGroup = "rg-sreagent-$Project-$Environment-$AzureSreAgentLocationShort"
 $resourceGroups = @{
     Network    = "rg-network-$baseName"
@@ -118,6 +190,14 @@ if ($ValidateAzureSreAgent) {
         Write-Check -Name "Azure SRE Agent identity exists" -Passed ((Get-ResourceCount -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.ManagedIdentity/userAssignedIdentities") -gt 0) -Detail $azureSreAgentResourceGroup
         Write-Check -Name "Azure SRE Agent Application Insights exists" -Passed ((Get-ResourceCount -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.Insights/components") -gt 0) -Detail $azureSreAgentResourceGroup
         Write-Check -Name "Azure SRE Agent telemetry workspace exists" -Passed ((Get-ResourceCount -ResourceGroupName $azureSreAgentResourceGroup -ResourceType "Microsoft.OperationalInsights/workspaces") -gt 0) -Detail $azureSreAgentResourceGroup
+
+        if ($ValidateAzureDevOpsRepo) {
+            if ([string]::IsNullOrWhiteSpace($azureDevOpsRepoNameEffective) -or [string]::IsNullOrWhiteSpace($azureDevOpsRepoUrlEffective)) {
+                throw "Pass -AzureDevOpsRepoName and -AzureDevOpsRepoUrl when using -ValidateAzureDevOpsRepo outside the ado-lab profile."
+            }
+            $agentEndpoint = Get-AzureSreAgentEndpoint -ResourceGroupName $azureSreAgentResourceGroup -AgentName $azureSreAgentNameEffective
+            Write-Check -Name "Azure DevOps repo connected to Azure SRE Agent" -Passed (Test-AzureSreAgentRepoConnection -Endpoint $agentEndpoint -RepoName $azureDevOpsRepoNameEffective -RepoUrl $azureDevOpsRepoUrlEffective) -Detail $azureDevOpsRepoUrlEffective
+        }
     }
 }
 

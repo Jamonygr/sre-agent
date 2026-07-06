@@ -22,7 +22,14 @@ try {
 
     Push-Location $tempRoot
     terraform init -backend=false -reconfigure
+    if ($LASTEXITCODE -ne 0) {
+        throw "terraform init failed with exit code $LASTEXITCODE."
+    }
+
     terraform plan "-var-file=$VarFile" -input=false -lock=false -refresh=false
+    if ($LASTEXITCODE -ne 0) {
+        throw "terraform plan failed with exit code $LASTEXITCODE."
+    }
 }
 finally {
     Pop-Location -ErrorAction SilentlyContinue

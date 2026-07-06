@@ -10,8 +10,9 @@ This wiki documents the Azure-native SRE lab: how Terraform builds Windows targe
 | 2 | [Monitoring and dashboards](architecture/monitoring-and-dashboards.md) | AMA, DCR, Log Analytics, KQL alerts, Workbooks, and dashboards |
 | 3 | [Update management](architecture/update-management.md) | Update Manager, PatchGroup tags, backup, policy, budgets, and runbooks |
 | 4 | [Operational readiness](../docs/operational-readiness.md) | Security, reliability, cost, governance, and operations review points |
-| 5 | [Variables reference](reference/variables.md) | Feature flags, VM settings, thresholds, and cost controls |
-| 6 | [Pipeline](reference/pipeline.md) | GitHub Actions validation, plan, apply, smoke tests, and destroy |
+| 5 | [Azure SRE Agent integration](reference/azure-sre-agent.md) | Portal agent setup, optional DevOps context, connector defaults, and destroy guidance |
+| 6 | [Variables reference](reference/variables.md) | Feature flags, VM settings, thresholds, and cost controls |
+| 7 | [Pipeline](reference/pipeline.md) | GitHub Actions validation, plan, apply, smoke tests, and destroy |
 
 ## Architecture Snapshots
 
@@ -56,6 +57,7 @@ This wiki documents the Azure-native SRE lab: how Terraform builds Windows targe
 | --- | --- |
 | [Variables reference](reference/variables.md) | Main inputs and feature flags |
 | [Outputs reference](reference/outputs.md) | Resource IDs, endpoints, runbooks, and summary output |
+| [Azure SRE Agent integration](reference/azure-sre-agent.md) | Azure SRE Agent connector defaults, optional Azure DevOps connection, PAT validation, and cleanup |
 | [Naming conventions](reference/naming-conventions.md) | Resource naming pattern and examples |
 | [Pipeline](reference/pipeline.md) | CI/CD workflow and secrets |
 | [State and secrets](reference/state-and-secrets.md) | Remote state and private VM credential guidance |

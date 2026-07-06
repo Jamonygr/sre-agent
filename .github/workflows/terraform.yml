@@ -23,7 +23,7 @@ on:
         required: true
         default: lab
         type: choice
-        options: [cheap-lab, dev, lab, full]
+        options: [cheap-lab, ado-lab, dev, lab, full]
       action:
         description: Action
         required: true

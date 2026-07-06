@@ -18,7 +18,7 @@ The GitHub Actions workflow in `.github/workflows/terraform.yml` follows the sam
 
 | Input | Values |
 | --- | --- |
-| `environment` | `cheap-lab`, `dev`, `lab`, `full` |
+| `environment` | `cheap-lab`, `ado-lab`, `dev`, `lab`, `full` |
 | `action` | `plan`, `apply`, `destroy` |
 | `destroy_confirm` | Must be `DESTROY` for destroy |
 

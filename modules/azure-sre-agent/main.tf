@@ -83,6 +83,15 @@ resource "azurerm_role_assignment" "uami_target_log_analytics_reader" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "uami_target_monitoring_reader" {
+  for_each = var.managed_resource_group_ids
+
+  scope                            = each.value
+  role_definition_name             = "Monitoring Reader"
+  principal_id                     = azurerm_user_assigned_identity.agent.principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "azurerm_role_assignment" "uami_target_contributor" {
   for_each = var.access_level == "High" ? var.managed_resource_group_ids : {}
 
@@ -95,6 +104,13 @@ resource "azurerm_role_assignment" "uami_target_contributor" {
 resource "azurerm_role_assignment" "uami_monitoring_reader" {
   scope                            = azurerm_resource_group.this.id
   role_definition_name             = "Monitoring Reader"
+  principal_id                     = azurerm_user_assigned_identity.agent.principal_id
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "uami_subscription_monitoring_contributor" {
+  scope                            = data.azurerm_subscription.current.id
+  role_definition_name             = "Monitoring Contributor"
   principal_id                     = azurerm_user_assigned_identity.agent.principal_id
   skip_service_principal_aad_check = true
 }
@@ -146,8 +162,10 @@ resource "azapi_resource" "agent" {
 
   depends_on = [
     azurerm_role_assignment.uami_monitoring_reader,
+    azurerm_role_assignment.uami_subscription_monitoring_contributor,
     azurerm_role_assignment.uami_target_reader,
     azurerm_role_assignment.uami_target_log_analytics_reader,
+    azurerm_role_assignment.uami_target_monitoring_reader,
     azurerm_role_assignment.uami_target_contributor,
   ]
 }
@@ -183,11 +201,27 @@ resource "azurerm_role_assignment" "smi_target_log_analytics_reader" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "smi_target_monitoring_reader" {
+  for_each = var.managed_resource_group_ids
+
+  scope                            = each.value
+  role_definition_name             = "Monitoring Reader"
+  principal_id                     = azapi_resource.agent.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "azurerm_role_assignment" "smi_target_contributor" {
   for_each = var.access_level == "High" ? var.managed_resource_group_ids : {}
 
   scope                            = each.value
   role_definition_name             = "Contributor"
+  principal_id                     = azapi_resource.agent.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "smi_subscription_monitoring_contributor" {
+  scope                            = data.azurerm_subscription.current.id
+  role_definition_name             = "Monitoring Contributor"
   principal_id                     = azapi_resource.agent.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
@@ -212,6 +246,8 @@ resource "azapi_resource" "connector" {
   depends_on = [
     azurerm_role_assignment.smi_target_reader,
     azurerm_role_assignment.smi_target_log_analytics_reader,
+    azurerm_role_assignment.smi_target_monitoring_reader,
     azurerm_role_assignment.smi_target_contributor,
+    azurerm_role_assignment.smi_subscription_monitoring_contributor,
   ]
 }

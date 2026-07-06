@@ -25,6 +25,8 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | `deploy_workbooks` | `true` | Create SRE workbook |
 | `deploy_sre_agent` | `true` | Create Automation Account and runbooks |
 | `deploy_azure_sre_agent` | `false` | Create a portal-visible Azure SRE Agent (`Microsoft.App/agents`) |
+| `enable_azure_sre_agent_log_analytics_connector` | `true` | Add persistent Log Analytics workspace context to the Azure SRE Agent when the workspace exists |
+| `enable_azure_sre_agent_azure_monitor_connector` | `false` | Opt in to the preview Azure Monitor connector subresource |
 | `enable_alert_runbook_webhooks` | `false` | Opt in to alert-triggered runbooks |
 | `deploy_update_management` | `true` | Create Update Manager maintenance config |
 | `deploy_backup` | `false` | Create Recovery Services Vault and protect VMs |
@@ -47,6 +49,9 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | `azure_sre_agent_model_provider` | `MicrosoftFoundry` | Default model provider |
 | `azure_sre_agent_model_name` | `Automatic` | Let the platform select the model |
 | `azure_sre_agent_monthly_unit_limit` | `500` | Lowest active-flow AAU allocation limit |
+| `azure_sre_agent_monitor_lookback_days` | `7` | Lookback window used only when the preview Azure Monitor connector is enabled |
+
+Azure DevOps repository and wiki connections are optional and are configured in the Azure SRE Agent portal after deployment. Terraform tags `ado-lab` with repo context, but it does not store PATs or require a DevOps connection for normal validation.
 
 ## VM And Access
 
@@ -90,6 +95,7 @@ The main controls live in `variables.tf`, `terraform.tfvars.example`, and `envir
 | Profile | File |
 | --- | --- |
 | `cheap-lab` | `environments/cheap-lab.tfvars` |
+| `ado-lab` | `environments/ado-lab.tfvars` |
 | `dev` | `environments/dev.tfvars` |
 | `lab` | `environments/lab.tfvars` |
 | `full` | `environments/full.tfvars` |

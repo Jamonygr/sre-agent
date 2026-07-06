@@ -648,8 +648,8 @@ module "azure_sre_agent" {
   default_model_name             = var.azure_sre_agent_model_name
   monthly_agent_unit_limit       = var.azure_sre_agent_monthly_unit_limit
   azure_monitor_lookback_days    = var.azure_sre_agent_monitor_lookback_days
-  enable_azure_monitor_connector = true
-  enable_log_analytics_connector = var.deploy_monitoring && var.deploy_log_analytics
+  enable_azure_monitor_connector = var.enable_azure_sre_agent_azure_monitor_connector
+  enable_log_analytics_connector = var.enable_azure_sre_agent_log_analytics_connector && var.deploy_monitoring && var.deploy_log_analytics
   tags                           = local.common_tags
 }
 
